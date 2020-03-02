@@ -1,7 +1,7 @@
 # google_directions_api
 
 ![Build](https://github.com/marchdev-tk/google_directions_api/workflows/build/badge.svg)
-[![Pub](https://img.shields.io/pub/v/flinq.svg)](https://pub.dartlang.org/packages/google_directions_api)
+[![Pub](https://img.shields.io/pub/v/google_directions_api.svg)](https://pub.dartlang.org/packages/google_directions_api)
 ![GitHub](https://img.shields.io/github/license/marchdev-tk/google_directions_api)
 ![GitHub stars](https://img.shields.io/github/stars/marchdev-tk/google_directions_api?style=social)
 
