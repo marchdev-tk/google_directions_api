@@ -21,6 +21,8 @@ The API returns the most efficient routes when calculating directions. Travel ti
 
 **Note**: This service is **not designed to respond in real time to user input**. 
 
+For full info about Directions API visit official [documentation](https://developers.google.com/maps/documentation/directions/intro#top_of_page)
+
 ### Usage
 
 ```dart
@@ -29,7 +31,7 @@ import 'package:google_directions_api/google_directions_api.dart';
 void main() {
   DirectionsService.init('API_KEY');
 
-  final directinosService = DirectionsService();
+  final directionsService = DirectionsService();
 
   final request = DirectionsRequest(
     origin: 'New York',
@@ -37,7 +39,7 @@ void main() {
     travelMode: TravelMode.driving,
   );
 
-  directinosService.route(request,
+  directionsService.route(request,
       (DirectionsResult response, DirectionsStatus status) {
     if (status == DirectionsStatus.ok) {
       // do something with successful response
@@ -54,5 +56,4 @@ Feel free to post a feature requests or report a bug [here](https://github.com/m
 
 ## TODO
 
-* Redesign class names
 * Finish DirectionsRequest parameters

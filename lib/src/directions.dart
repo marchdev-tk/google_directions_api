@@ -52,7 +52,7 @@ class DirectionsService {
       return true;
     }());
 
-    final url = '$_directionApiUrl${request.toParams()}&key=${apiKey}';
+    final url = '$_directionApiUrl${request.toParams()}&key=$apiKey';
     final response = await http.get(url);
 
     if (response.statusCode != 200) {
@@ -74,24 +74,49 @@ class DirectionsRequest {
     @required this.origin,
     @required this.destination,
     this.travelMode,
+    this.alternatives,
   });
 
-  /// As a value of location could be used:
-  ///  * [LatLng]
-  ///  * [String]
+  /// The address, textual latitude/longitude value, or place ID
+  /// from which you wish to calculate directions.
   ///
-  /// PlaceId should be passe with the following format:
+  /// This field is required.
   ///
-  ///   `place_id:ChIJ3S-JXmauEmsRUcIaWtf4MzE`
+  ///  * If you pass an **address**, the Directions service geocodes
+  /// the string and converts it to a latitude/longitude
+  /// coordinate to calculate directions. This coordinate may be
+  /// different from that returned by the Geocoding API, for
+  /// example a building entrance rather than its center.
+  ///
+  ///   ```origin=24+Sussex+Drive+Ottawa+ON```
+  ///
+  ///  * If you pass **coordinates**, they are used unchanged to
+  /// calculate directions. Ensure that no space exists between
+  /// the latitude and longitude values.
+  ///
+  ///   ```origin=41.43206,-81.38992```
+  ///
+  ///  * Place IDs must be prefixed with place_id:. The place ID
+  /// may only be specified if the request includes an API key or
+  /// a Google Maps Platform Premium Plan client ID. You can
+  /// retrieve place IDs from the Geocoding API and the Places
+  /// API (including Place Autocomplete). For an example using
+  /// place IDs from Place Autocomplete, see
+  /// [Place Autocomplete and Directions][place_info]. For more
+  ///  place IDs, see the [Place ID overview][place_overview].
+  ///
+  ///   ```origin=place_id:ChIJ3S-JXmauEmsRUcIaWtf4MzE```
+  ///
+  /// [place_info]: https://developers.google.com/maps/documentation/javascript/examples/places-autocomplete-directions
+  /// [place_overview]: https://developers.google.com/places/place-id
   final dynamic origin;
 
-  /// As a value of location could be used:
-  ///  * [LatLng]
-  ///  * [String]
+  /// The address, textual latitude/longitude value, or place ID
+  /// to which you wish to calculate directions. The options for
+  /// the destination parameter are the same as for the [origin]
+  /// parameter, described above.
   ///
-  /// PlaceId should be passed with the following format:
-  ///
-  ///   `place_id:ChIJ3S-JXmauEmsRUcIaWtf4MzE`
+  /// This field is required.
   final dynamic destination;
 
   /// Specifies the mode of transport to use when calculating
@@ -101,12 +126,24 @@ class DirectionsRequest {
   /// Default value is [TravelMode.driving]
   final TravelMode travelMode;
 
+  /// If set to `true`, specifies that the Directions service may
+  /// provide more than one route alternative in the response.
+  /// Note that providing route alternatives may increase the
+  /// response time from the server. This is only available for
+  /// requests without intermediate waypoints.
+  final bool alternatives;
+
   String _convertLocation(dynamic location) {
     if (location is LatLng) {
       return '${location.latitude},${location.longitude}';
+    } else if (location is String && location.startsWith('place_id:')) {
+      return location;
     } else if (location is String) {
       location = location.replaceAll(',', ' ');
-      return location.split(' ').join('+');
+      return location
+          .split(' ')
+          .where((_) => _.trim().isNotEmpty == true)
+          .join('+');
     }
 
     throw UnsupportedError(
@@ -119,5 +156,6 @@ class DirectionsRequest {
   /// Converts `this` object into query string parameters.
   String toParams() => '?origin=${_convertLocation(origin)}&'
       'destination=${_convertLocation(destination)}'
-      '${_addIfNotNull('mode', travelMode)}';
+      '${_addIfNotNull('mode', travelMode)}'
+      '${_addIfNotNull('alternatives', alternatives)}';
 }

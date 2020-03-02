@@ -16,7 +16,7 @@ LatLng _getLatLngFromMap(Map<String, dynamic> map) => map == null
 ///  * `status` contains metadata on the request. See [DirectionsStatus].
 ///  * `geocodedWaypoints` contains an array with details about the
 /// geocoding of origin, destination and waypoints. See
-/// [DirectionsGeocodedWaypoint].
+/// [GeocodedWaypoint].
 ///  * `routes` contains an array of routes from the origin to the
 /// destination. See [DirectionsRoute]. Routes consist of nested Legs
 /// and Steps.
@@ -42,8 +42,8 @@ class DirectionsResult {
       : DirectionsResult(
           routes: (map['routes'] as List)
               ?.mapList((_) => DirectionsRoute.fromMap(_)),
-          geocodedWaypoints: (map[''] as List)
-              ?.mapList((_) => DirectionsGeocodedWaypoint.fromMap(_)),
+          geocodedWaypoints:
+              (map[''] as List)?.mapList((_) => GeocodedWaypoint.fromMap(_)),
           status: DirectionsStatus(map['status']),
           errorMessage: map['error_message'] as String,
           availableTravelModes: (map['available_travel_modes'] as List)
@@ -71,7 +71,7 @@ class DirectionsResult {
   /// Elements in the geocoded_waypoints array correspond, by their
   /// zero-based position, to the origin, the waypoints in the order
   /// they are specified, and the destination.
-  final List<DirectionsGeocodedWaypoint> geocodedWaypoints;
+  final List<GeocodedWaypoint> geocodedWaypoints;
 
   /// The status field within the Directions response object contains
   /// the status of the request, and may contain debugging information
@@ -152,7 +152,7 @@ class DirectionsResult {
 /// A separate leg will be present for each waypoint or destination
 /// specified. (A route with no waypoints will contain exactly one
 /// leg within the legs array.) Each leg consists of a series of
-/// steps. (See [DirectionsLeg].)
+/// steps. (See [Leg].)
 ///  * `waypointOrder` contains an array indicating the order of any
 /// waypoints in the calculated route. This waypoints may be reordered
 /// if the request was passed optimize:true within its waypoints parameter.
@@ -202,14 +202,13 @@ class DirectionsRoute {
             southwest: _getLatLngFromMap(map['bounds']['southwest']),
           ),
           copyrights: map['copyrights'] as String,
-          legs: (map['legs'] as List)?.mapList((_) => DirectionsLeg.fromMap(_)),
-          overviewPolyline:
-              DirectionsOverviewPolyline.fromMap(map['overview_polyline']),
+          legs: (map['legs'] as List)?.mapList((_) => Leg.fromMap(_)),
+          overviewPolyline: OverviewPolyline.fromMap(map['overview_polyline']),
           summary: map['summary'] as String,
           warnings: (map['warnings'] as List)?.mapList((_) => _ as String),
           waypointOrder: (map['waypointOrder'] as List)
               ?.mapList((_) => num.tryParse(_?.toString())),
-          fare: DirectionsFare.fromMap(map['fare']),
+          fare: Fare.fromMap(map['fare']),
         );
 
   /// Contains the viewport bounding box of the [overviewPolyline].
@@ -224,8 +223,8 @@ class DirectionsRoute {
   /// A separate leg will be present for each waypoint or destination
   /// specified. (A route with no waypoints will contain exactly one
   /// leg within the legs array.) Each leg consists of a series of
-  /// steps. (See [DirectionsLeg].)
-  final List<DirectionsLeg> legs;
+  /// steps. (See [Leg].)
+  final List<Leg> legs;
 
   /// Contains a single points object that holds an
   /// [encoded polyline][enc_polyline] representation of the route.
@@ -233,7 +232,7 @@ class DirectionsRoute {
   /// directions.
   ///
   /// [enc_polyline]: https://developers.google.com/maps/documentation/utilities/polylinealgorithm
-  final DirectionsOverviewPolyline overviewPolyline;
+  final OverviewPolyline overviewPolyline;
 
   /// Contains a short textual description for the route, suitable for
   /// naming and disambiguating the route from alternatives.
@@ -258,7 +257,7 @@ class DirectionsRoute {
   ///   * `text`: The total fare amount, formatted in the requested language.
   ///
   /// [iso4217]: https://en.wikipedia.org/wiki/ISO_4217
-  final DirectionsFare fare;
+  final Fare fare;
 }
 
 /// Details about the geocoding of every waypoint, as well as origin
@@ -369,23 +368,22 @@ class DirectionsRoute {
 /// An empty list of types indicates there are no known types for
 /// the particular address component, for example, Lieu-dit in
 /// France.
-class DirectionsGeocodedWaypoint {
-  const DirectionsGeocodedWaypoint({
+class GeocodedWaypoint {
+  const GeocodedWaypoint({
     this.geocoderStatus,
     this.partialMatch,
     this.placeId,
     this.types,
   });
 
-  factory DirectionsGeocodedWaypoint.fromMap(Map<String, dynamic> map) =>
-      map == null
-          ? null
-          : DirectionsGeocodedWaypoint(
-              geocoderStatus: map['geocoder_status'] as String,
-              partialMatch: map['partial_match'] == 'true',
-              placeId: map['place_id'] as String,
-              types: (map['types'] as List)?.mapList((_) => _ as String),
-            );
+  factory GeocodedWaypoint.fromMap(Map<String, dynamic> map) => map == null
+      ? null
+      : GeocodedWaypoint(
+          geocoderStatus: map['geocoder_status'] as String,
+          partialMatch: map['partial_match'] == 'true',
+          placeId: map['place_id'] as String,
+          types: (map['types'] as List)?.mapList((_) => _ as String),
+        );
 
   /// Indicates the status code resulting from the geocoding
   /// operation. This field may contain the following values.
@@ -502,7 +500,7 @@ class DirectionsGeocodedWaypoint {
 ///
 ///  * `steps` contains an array of steps denoting information
 /// about each separate step of the leg of the journey.
-/// (See [DirectionsStep])
+/// (See [Step])
 ///
 ///  * `distance` indicates the total distance covered by this
 /// leg, as a field with the following elements:
@@ -551,7 +549,7 @@ class DirectionsGeocodedWaypoint {
 ///
 ///  * `arrivalTime` contains the estimated time of arrival for this
 /// leg. This property is only returned for transit directions. The
-/// result is returned as a [DirectionsTime] object with three properties:
+/// result is returned as a [Time] object with three properties:
 ///   * `value` the time specified as a [DateTime] object.
 ///   * `text` the time specified as a [String]. The time is displayed
 /// in the time zone of the transit stop.
@@ -560,7 +558,7 @@ class DirectionsGeocodedWaypoint {
 /// Database][iana], e.g. `"America/New_York"`.
 ///
 ///  * `departureTime` contains the estimated time of departure for
-/// this leg, specified as a [DirectionsTime] object. The departureTime
+/// this leg, specified as a [Time] object. The departureTime
 /// is only available for transit directions.
 ///
 ///  * `startLocation` contains the latitude/longitude coordinates
@@ -586,8 +584,8 @@ class DirectionsGeocodedWaypoint {
 /// this leg.
 ///
 /// [iana]: http://www.iana.org/time-zones
-class DirectionsLeg {
-  const DirectionsLeg({
+class Leg {
+  const Leg({
     this.arrivalTime,
     this.departureTime,
     this.distance,
@@ -600,12 +598,12 @@ class DirectionsLeg {
     this.steps,
   });
 
-  factory DirectionsLeg.fromMap(Map<String, dynamic> map) => map == null
+  factory Leg.fromMap(Map<String, dynamic> map) => map == null
       ? null
-      : DirectionsLeg(
-          arrivalTime: DirectionsTime.fromMap(map['arrival_time']),
-          departureTime: DirectionsTime.fromMap(map['departure_time']),
-          distance: DirectionsDistance.fromMap(map['distance']),
+      : Leg(
+          arrivalTime: Time.fromMap(map['arrival_time']),
+          departureTime: Time.fromMap(map['departure_time']),
+          distance: Distance.fromMap(map['distance']),
           duration: DirectionsDuration.fromMap(map['duration']),
           durationInTraffic:
               DirectionsDuration.fromMap(map['duration_in_trafic']),
@@ -613,25 +611,24 @@ class DirectionsLeg {
           endLocation: _getLatLngFromMap(map['end_location']),
           startAddress: map['start_address'] as String,
           startLocation: _getLatLngFromMap(map['start_location']),
-          steps:
-              (map['steps'] as List)?.mapList((_) => DirectionsStep.fromMap(_)),
+          steps: (map['steps'] as List)?.mapList((_) => Step.fromMap(_)),
         );
 
   /// Contains the estimated time of arrival for this leg. This property
   /// is only returned for transit directions. The result is returned as
-  /// a [DirectionsTime] object with three properties:
+  /// a [Time] object with three properties:
   ///   * `value` the time specified as a [DateTime] object.
   ///   * `text` the time specified as a string. The time is displayed
   /// in the time zone of the transit stop.
   ///   * `timeZone` contains the time zone of this station. The value
   /// is the name of the time zone as defined in the [IANA Time Zone
   /// Database][iana], e.g. `"America/New_York"`.
-  final DirectionsTime arrivalTime;
+  final Time arrivalTime;
 
   /// Contains the estimated time of departure for
-  /// this leg, specified as a [DirectionsTime] object. The departureTime
+  /// this leg, specified as a [Time] object. The departureTime
   /// is only available for transit directions.
-  final DirectionsTime departureTime;
+  final Time departureTime;
 
   /// Indicates the total distance covered by this leg, as a
   /// field with the following elements:
@@ -645,7 +642,7 @@ class DirectionsLeg {
   /// field always contains a value expressed in meters.
   ///
   /// These fields may be absent if the distance is unknown.
-  final DirectionsDistance distance;
+  final Distance distance;
 
   /// Indicates the total duration of this leg, as a field with
   /// the following elements:
@@ -705,7 +702,7 @@ class DirectionsLeg {
 
   /// contains an array of steps denoting information about each
   /// separate step of the leg of the journey.
-  final List<DirectionsStep> steps;
+  final List<Step> steps;
 }
 
 /// Each element in the steps array defines a single step of the
@@ -770,8 +767,8 @@ class DirectionsLeg {
 ///
 /// [directions_step_interface]: https://developers.google.com/maps/documentation/javascript/reference/directions#DirectionsStep
 /// [enc_polyline]: https://developers.google.com/maps/documentation/utilities/polylinealgorithm
-class DirectionsStep {
-  const DirectionsStep({
+class Step {
+  const Step({
     this.distance,
     this.duration,
     this.endLocation,
@@ -783,24 +780,23 @@ class DirectionsStep {
     this.travelMode,
   });
 
-  factory DirectionsStep.fromMap(Map<String, dynamic> map) => map == null
+  factory Step.fromMap(Map<String, dynamic> map) => map == null
       ? null
-      : DirectionsStep(
-          distance: DirectionsDistance.fromMap(map['distance']),
+      : Step(
+          distance: Distance.fromMap(map['distance']),
           duration: DirectionsDuration.fromMap(map['duration']),
           endLocation: _getLatLngFromMap(map['end_location']),
           startLocation: _getLatLngFromMap(map['start_location']),
           instructions: map['instructions'] as String,
           path: (map['path'] as List)?.mapList((_) => _getLatLngFromMap(_)),
-          steps:
-              (map['steps'] as List)?.mapList((_) => DirectionsStep.fromMap(_)),
-          transit: DirectionsTransitDetails.fromMap(map['transit']),
+          steps: (map['steps'] as List)?.mapList((_) => Step.fromMap(_)),
+          transit: TransitDetails.fromMap(map['transit']),
           travelMode: TravelMode(map['travel_mode']),
         );
 
   /// Contains the distance covered by this step until the next
   /// step. This field may be undefined if the distance is unknown.
-  final DirectionsDistance distance;
+  final Distance distance;
 
   /// Contains the typical time required to perform the step,
   /// until the next step. This field may be undefined if the
@@ -827,13 +823,13 @@ class DirectionsStep {
   /// steps in transit directions. Substeps are only available when
   /// travelMode is set to "transit". The inner steps array is of
   /// the same type as steps.
-  final List<DirectionsStep> steps;
+  final List<Step> steps;
 
   /// Contains transit specific information.
   /// This field is only returned with `travelMode` is set to
   /// "transit". See Transit Details below. (Corresponds to transit
   /// in the [Directions.Step interface][directions_step_interface].)
-  final DirectionsTransitDetails transit;
+  final TransitDetails transit;
 
   /// Contains the type of travel mode used.
   final TravelMode travelMode;
@@ -843,7 +839,7 @@ class DirectionsStep {
 /// relevant for other modes of transportation. These additional
 /// properties are exposed through the `transit` object,
 /// returned as a field of an element in the `steps` array. From
-/// the [DirectionsTransitDetails] object you can access additional
+/// the [TransitDetails] object you can access additional
 /// information about the transit stop, transit line and transit
 /// agency.
 ///
@@ -898,7 +894,7 @@ class DirectionsStep {
 ///   * `color` contains the color commonly used in signage for this
 /// transit line. The color will be specified as a hex string such
 /// as: #FF0033.
-///   * `agencies` is an array containing a single [DirectionsTransitAgency]
+///   * `agencies` is an array containing a single [TransitAgency]
 ///  object. The DirectionsTransitAgency] object provides information
 /// about the operator of the line, including the following properties:
 ///     * `name` contains the name of the transit agency.
@@ -924,8 +920,8 @@ class DirectionsStep {
 /// vehicle type, based on the local transport signage.
 ///
 /// [iana]: http://www.iana.org/time-zones
-class DirectionsTransitDetails {
-  const DirectionsTransitDetails({
+class TransitDetails {
+  const TransitDetails({
     this.arrivalStop,
     this.departureStop,
     this.arrivalTime,
@@ -937,21 +933,19 @@ class DirectionsTransitDetails {
     this.tripShortName,
   });
 
-  factory DirectionsTransitDetails.fromMap(Map<String, dynamic> map) =>
-      map == null
-          ? null
-          : DirectionsTransitDetails(
-              arrivalStop: DirectionsTransitStop.fromMap(map['arrival_stop']),
-              departureStop:
-                  DirectionsTransitStop.fromMap(map['departure_stop']),
-              arrivalTime: DirectionsTime.fromMap(map['arrival_time']),
-              departureTime: DirectionsTime.fromMap(map['departure_time']),
-              headsign: map['headsign'] as String,
-              headway: map['headway'] as num,
-              line: DirectionsTransitLine.fromMap(map['line']),
-              numStops: map['num_stops'] as num,
-              tripShortName: map['trip_short_name'] as String,
-            );
+  factory TransitDetails.fromMap(Map<String, dynamic> map) => map == null
+      ? null
+      : TransitDetails(
+          arrivalStop: TransitStop.fromMap(map['arrival_stop']),
+          departureStop: TransitStop.fromMap(map['departure_stop']),
+          arrivalTime: Time.fromMap(map['arrival_time']),
+          departureTime: Time.fromMap(map['departure_time']),
+          headsign: map['headsign'] as String,
+          headway: map['headway'] as num,
+          line: TransitLine.fromMap(map['line']),
+          numStops: map['num_stops'] as num,
+          tripShortName: map['trip_short_name'] as String,
+        );
 
   /// Contains information about the stop/station for this part of
   /// the trip. Stop details can include:
@@ -959,7 +953,7 @@ class DirectionsTransitDetails {
   /// Square".
   ///   * `location` the location of the transit station/stop,
   /// represented as a lat and lng field.
-  final DirectionsTransitStop arrivalStop;
+  final TransitStop arrivalStop;
 
   /// Contains information about the stop/station for this part of
   /// the trip. Stop details can include:
@@ -967,7 +961,7 @@ class DirectionsTransitDetails {
   /// Square".
   ///   * `location` the location of the transit station/stop,
   /// represented as a lat and lng field.
-  final DirectionsTransitStop departureStop;
+  final TransitStop departureStop;
 
   /// Contain the arrival times for this leg of the journey,
   /// specified as the following three properties:
@@ -980,7 +974,7 @@ class DirectionsTransitDetails {
   /// [IANA Time Zone Database][iana], e.g. `"America/New_York"`.
   ///
   /// [iana]: http://www.iana.org/time-zones
-  final DirectionsTime arrivalTime;
+  final Time arrivalTime;
 
   /// Contain the departure times for this leg of the journey,
   /// specified as the following three properties:
@@ -993,7 +987,7 @@ class DirectionsTransitDetails {
   /// [IANA Time Zone Database][iana], e.g. `"America/New_York"`.
   ///
   /// [iana]: http://www.iana.org/time-zones
-  final DirectionsTime departureTime;
+  final Time departureTime;
 
   /// Specifies the direction in which to travel on this line,
   /// as it is marked on the vehicle or at the departure stop.
@@ -1007,7 +1001,7 @@ class DirectionsTransitDetails {
   final num headway;
 
   /// Contains information about the transit line used in this step.
-  final DirectionsTransitLine line;
+  final TransitLine line;
 
   /// Contains the number of stops in this step, counting the
   /// arrival stop, but not the departure stop. For example,
@@ -1033,8 +1027,8 @@ class DirectionsTransitDetails {
 ///   * `color` contains the color commonly used in signage for this
 /// transit line. The color will be specified as a hex string such
 /// as: #FF0033.
-///   * `agencies` is an array containing a single [DirectionsTransitAgency]
-/// object. The [DirectionsTransitAgency] object provides information
+///   * `agencies` is an array containing a single [TransitAgency]
+/// object. The [TransitAgency] object provides information
 /// about the operator of the line, including the following properties:
 ///     * `name` contains the name of the transit agency.
 ///     * `phone` contains the phone number of the transit agency.
@@ -1057,8 +1051,8 @@ class DirectionsTransitDetails {
 ///     * `icon` contains the URL for an icon associated with this vehicle type.
 ///     * `localIcon` contains the URL for the icon associated with this
 /// vehicle type, based on the local transport signage.
-class DirectionsTransitLine {
-  const DirectionsTransitLine({
+class TransitLine {
+  const TransitLine({
     this.name,
     this.shortName,
     this.color,
@@ -1069,18 +1063,18 @@ class DirectionsTransitLine {
     this.vehicle,
   });
 
-  factory DirectionsTransitLine.fromMap(Map<String, dynamic> map) => map == null
+  factory TransitLine.fromMap(Map<String, dynamic> map) => map == null
       ? null
-      : DirectionsTransitLine(
+      : TransitLine(
           name: map['name'] as String,
           shortName: map['short_name'] as String,
           color: map['color'] as String,
           agencies: (map['agencies'] as List)
-              ?.mapList((_) => DirectionsTransitAgency.fromMap(_)),
+              ?.mapList((_) => TransitAgency.fromMap(_)),
           url: map['url'] as String,
           icon: map['icon'] as String,
           textColor: map['text_color'] as String,
-          vehicle: DirectionsVehicle.fromMap(map['vehicle']),
+          vehicle: Vehicle.fromMap(map['vehicle']),
         );
 
   /// Contains the full name of this transit line. eg. "7 Avenue Express".
@@ -1094,8 +1088,8 @@ class DirectionsTransitLine {
   /// The color will be specified as a hex string such as: #FF0033.
   final String color;
 
-  /// Is an array containing a single [DirectionsTransitAgency] object.
-  /// The [DirectionsTransitAgency] object provides information
+  /// Is an array containing a single [TransitAgency] object.
+  /// The [TransitAgency] object provides information
   /// about the operator of the line, including the following properties:
   ///  * `name` contains the name of the transit agency.
   ///  * `phone` contains the phone number of the transit agency.
@@ -1103,7 +1097,7 @@ class DirectionsTransitLine {
   ///
   ///   You must display the names and URLs of the transit agencies
   /// servicing the trip results.
-  final List<DirectionsTransitAgency> agencies;
+  final List<TransitAgency> agencies;
 
   /// Contains the URL for this transit line as provided by the transit agency.
   final String url;
@@ -1119,12 +1113,12 @@ class DirectionsTransitLine {
   /// This may include the following properties:
   ///  * `name` contains the name of the vehicle on this line. eg. "Subway."
   ///  * `type` contains the type of vehicle that runs on this line.
-  /// See the [DirectionsVehicleType] documentation for a complete list of
+  /// See the [VehicleType] documentation for a complete list of
   /// supported values.
   ///  * `icon` contains the URL for an icon associated with this vehicle type.
   ///  * `localIcon` contains the URL for the icon associated with this
   /// vehicle type, based on the local transport signage.
-  final DirectionsVehicle vehicle;
+  final Vehicle vehicle;
 }
 
 /// Contains a single points object that holds an
@@ -1133,15 +1127,14 @@ class DirectionsTransitLine {
 /// directions.
 ///
 /// [enc_polyline]: https://developers.google.com/maps/documentation/utilities/polylinealgorithm
-class DirectionsOverviewPolyline {
-  const DirectionsOverviewPolyline({this.points});
+class OverviewPolyline {
+  const OverviewPolyline({this.points});
 
-  factory DirectionsOverviewPolyline.fromMap(Map<String, dynamic> map) =>
-      map == null
-          ? null
-          : DirectionsOverviewPolyline(
-              points: map['points'] as String,
-            );
+  factory OverviewPolyline.fromMap(Map<String, dynamic> map) => map == null
+      ? null
+      : OverviewPolyline(
+          points: map['points'] as String,
+        );
 
   /// Contains [encoded polyline][enc_polyline] representation of the
   /// route. This polyline is an approximate (smoothed) path of the
@@ -1161,12 +1154,12 @@ class DirectionsOverviewPolyline {
 /// within the United States.) Note that regardless of what
 /// unit system is displayed as text, the `distance.value`
 /// field always contains a value expressed in meters.
-class DirectionsDistance {
-  const DirectionsDistance({this.text, this.value});
+class Distance {
+  const Distance({this.text, this.value});
 
-  factory DirectionsDistance.fromMap(Map<String, dynamic> map) => map == null
+  factory Distance.fromMap(Map<String, dynamic> map) => map == null
       ? null
-      : DirectionsDistance(
+      : Distance(
           text: map['text'] as String,
           value: map['value'],
         );
@@ -1214,16 +1207,16 @@ class DirectionsDuration {
 /// Database][iana], e.g. `"America/New_York"`.
 ///
 /// [iana]: http://www.iana.org/time-zones
-class DirectionsTime {
-  const DirectionsTime({
+class Time {
+  const Time({
     this.text,
     this.timeZone,
     this.value,
   });
 
-  factory DirectionsTime.fromMap(Map<String, dynamic> map) => map == null
+  factory Time.fromMap(Map<String, dynamic> map) => map == null
       ? null
-      : DirectionsTime(
+      : Time(
           text: map['text'] as String,
           timeZone: map['time_zone'] as String,
           value: DateTime.tryParse(map['value'] as String),
@@ -1254,16 +1247,16 @@ class DirectionsTime {
 ///   * `text`: The total fare amount, formatted in the requested language.
 ///
 /// [iso4217]: https://en.wikipedia.org/wiki/ISO_4217
-class DirectionsFare {
-  const DirectionsFare({
+class Fare {
+  const Fare({
     this.text,
     this.currency,
     this.value,
   });
 
-  factory DirectionsFare.fromMap(Map<String, dynamic> map) => map == null
+  factory Fare.fromMap(Map<String, dynamic> map) => map == null
       ? null
-      : DirectionsFare(
+      : Fare(
           text: map['text'] as String,
           currency: map['currency'] as String,
           value: map['value'] as num,
@@ -1286,12 +1279,12 @@ class DirectionsFare {
 /// Square".
 ///   * `location` the location of the transit station/stop,
 /// represented as a lat and lng field.
-class DirectionsTransitStop {
-  const DirectionsTransitStop({this.name, this.location});
+class TransitStop {
+  const TransitStop({this.name, this.location});
 
-  factory DirectionsTransitStop.fromMap(Map<String, dynamic> map) => map == null
+  factory TransitStop.fromMap(Map<String, dynamic> map) => map == null
       ? null
-      : DirectionsTransitStop(
+      : TransitStop(
           name: map['name'] as String,
           location: _getLatLngFromMap(map['location']),
         );
@@ -1309,21 +1302,20 @@ class DirectionsTransitStop {
 ///  * `name` contains the name of the transit agency.
 ///  * `phone` contains the phone number of the transit agency.
 ///  * `url` contains the URL for the transit agency.
-class DirectionsTransitAgency {
-  const DirectionsTransitAgency({
+class TransitAgency {
+  const TransitAgency({
     this.name,
     this.phone,
     this.url,
   });
 
-  factory DirectionsTransitAgency.fromMap(Map<String, dynamic> map) =>
-      map == null
-          ? null
-          : DirectionsTransitAgency(
-              name: map['name'] as String,
-              phone: map['phone'] as String,
-              url: map['url'] as String,
-            );
+  factory TransitAgency.fromMap(Map<String, dynamic> map) => map == null
+      ? null
+      : TransitAgency(
+          name: map['name'] as String,
+          phone: map['phone'] as String,
+          url: map['url'] as String,
+        );
 
   /// Contains the name of the transit agency.
   final String name;
@@ -1339,24 +1331,24 @@ class DirectionsTransitAgency {
 /// This may include the following properties:
 ///  * `name` contains the name of the vehicle on this line. eg. "Subway."
 ///  * `type` contains the type of vehicle that runs on this line.
-/// See the [DirectionsVehicleType] documentation for a complete list of
+/// See the [VehicleType] documentation for a complete list of
 /// supported values.
 ///  * `icon` contains the URL for an icon associated with this vehicle type.
 ///  * `localIcon` contains the URL for the icon associated with this
 /// vehicle type, based on the local transport signage.
-class DirectionsVehicle {
-  const DirectionsVehicle({
+class Vehicle {
+  const Vehicle({
     this.name,
     this.type,
     this.icon,
     this.localIcon,
   });
 
-  factory DirectionsVehicle.fromMap(Map<String, dynamic> map) => map == null
+  factory Vehicle.fromMap(Map<String, dynamic> map) => map == null
       ? null
-      : DirectionsVehicle(
+      : Vehicle(
           name: map['name'] as String,
-          type: DirectionsVehicleType(map['type']),
+          type: VehicleType(map['type']),
           icon: map['icon'] as String,
           localIcon: map['localIcon'] as String,
         );
@@ -1365,7 +1357,7 @@ class DirectionsVehicle {
   final String name;
 
   /// Contains the type of vehicle that runs on this line.
-  final DirectionsVehicleType type;
+  final VehicleType type;
 
   /// Contains the URL for an icon associated with this vehicle type.
   final String icon;
@@ -1490,12 +1482,12 @@ class TravelMode {
 }
 
 /// Type of vehicle.
-class DirectionsVehicleType {
-  const DirectionsVehicleType(this._name);
+class VehicleType {
+  const VehicleType(this._name);
 
   final String _name;
 
-  static final values = <DirectionsVehicleType>[
+  static final values = <VehicleType>[
     bus,
     cableCard,
     commuterTrain,
@@ -1516,65 +1508,65 @@ class DirectionsVehicleType {
   ];
 
   /// Bus.
-  static const bus = DirectionsVehicleType('BUS');
+  static const bus = VehicleType('BUS');
 
   /// A vehicle that operates on a cable, usually on the ground.
   /// Aerial cable cars may be of the type GONDOLA_LIFT.
-  static const cableCard = DirectionsVehicleType('CABLE_CAR');
+  static const cableCard = VehicleType('CABLE_CAR');
 
   /// Commuter rail.
-  static const commuterTrain = DirectionsVehicleType('COMMUTER_TRAIN');
+  static const commuterTrain = VehicleType('COMMUTER_TRAIN');
 
   /// Ferry.
-  static const ferry = DirectionsVehicleType('FERRY');
+  static const ferry = VehicleType('FERRY');
 
   /// A vehicle that is pulled up a steep incline by a cable.
-  static const funicular = DirectionsVehicleType('FUNICULAR');
+  static const funicular = VehicleType('FUNICULAR');
 
   /// An aerial cable car.
-  static const gondolaLift = DirectionsVehicleType('GONDOLA_LIFT');
+  static const gondolaLift = VehicleType('GONDOLA_LIFT');
 
   /// Heavy rail.
-  static const heavyRail = DirectionsVehicleType('HEAVY_RAIL');
+  static const heavyRail = VehicleType('HEAVY_RAIL');
 
   /// High speed train.
-  static const highSpeedTrain = DirectionsVehicleType('HIGH_SPEED_TRAIN');
+  static const highSpeedTrain = VehicleType('HIGH_SPEED_TRAIN');
 
   /// Intercity bus.
-  static const intercityBus = DirectionsVehicleType('INTERCITY_BUS');
+  static const intercityBus = VehicleType('INTERCITY_BUS');
 
   /// Light rail.
-  static const metroRail = DirectionsVehicleType('METRO_RAIL');
+  static const metroRail = VehicleType('METRO_RAIL');
 
   /// Monorail.
-  static const monorail = DirectionsVehicleType('MONORAIL');
+  static const monorail = VehicleType('MONORAIL');
 
   /// Other vehicles.
-  static const other = DirectionsVehicleType('OTHER');
+  static const other = VehicleType('OTHER');
 
   /// Rail.
-  static const rail = DirectionsVehicleType('RAIL');
+  static const rail = VehicleType('RAIL');
 
   /// Share taxi is a sort of bus transport with ability to drop
   /// off and pick up passengers anywhere on its route. Generally
   /// share taxi uses minibus vehicles.
-  static const shareTaxi = DirectionsVehicleType('SHARE_TAXI');
+  static const shareTaxi = VehicleType('SHARE_TAXI');
 
   /// Underground light rail.
-  static const subway = DirectionsVehicleType('SUBWAY');
+  static const subway = VehicleType('SUBWAY');
 
   /// Above ground light rail.
-  static const tram = DirectionsVehicleType('TRAM');
+  static const tram = VehicleType('TRAM');
 
   /// Trolleybus.
-  static const trolleybus = DirectionsVehicleType('TROLLEYBUS');
+  static const trolleybus = VehicleType('TROLLEYBUS');
 
   @override
   int get hashCode => _name.hashCode;
 
   @override
   bool operator ==(dynamic other) =>
-      other is DirectionsVehicleType && _name == other._name;
+      other is VehicleType && _name == other._name;
 
   @override
   String toString() => '$_name';

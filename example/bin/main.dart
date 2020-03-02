@@ -7,7 +7,7 @@ import 'package:google_directions_api/google_directions_api.dart';
 void main() {
   DirectionsService.init('API_KEY');
 
-  final directinosService = DirectionsService();
+  final directionsService = DirectionsService();
 
   final request = DirectionsRequest(
     origin: 'New York',
@@ -15,7 +15,7 @@ void main() {
     travelMode: TravelMode.driving,
   );
 
-  directinosService.route(request,
+  directionsService.route(request,
       (DirectionsResult response, DirectionsStatus status) {
     if (status == DirectionsStatus.ok) {
       // do something with successful response
