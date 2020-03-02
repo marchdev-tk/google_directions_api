@@ -13,8 +13,6 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
-
-    - name: install dependencies
     - uses: subosito/flutter-action@v1
       with:
         channel: 'beta'
