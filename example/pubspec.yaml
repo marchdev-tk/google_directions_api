@@ -1,0 +1,9 @@
+name: google_directions_api_example
+description: Example command line application of google_directions_api package.
+
+environment:
+  sdk: '>=2.6.0 <3.0.0'
+
+dependencies:
+  google_directions_api:
+    path: ../
