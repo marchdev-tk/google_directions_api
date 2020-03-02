@@ -1,7 +1,10 @@
-// Copyright (c) 2020, the MarchDev Toolkit project authors. Please see the AUTHORS file
-// for details. All rights reserved. Use of this source code is governed by a
-// BSD-style license that can be found in the LICENSE file.
+# google_directions_api_example
 
+Demonstrates how to use the google_directions_api package.
+
+## Usage
+
+```dart
 import 'package:google_directions_api/google_directions_api.dart';
 
 void main() {
@@ -10,8 +13,8 @@ void main() {
   final directinosService = DirectionsService();
 
   final request = DirectionsRequest(
-    origin: 'New York',
-    destination: 'San Francisco',
+    origin: 'Chicago, IL',
+    destination: 'San Francisco, CA',
     travelMode: TravelMode.driving,
   );
 
@@ -24,3 +27,10 @@ void main() {
     }
   });
 }
+```
+
+## Getting Started
+
+For help getting started with Directions API, view 
+[online documentation](https://developers.google.com/maps/documentation/directions/start), which offers tutorials, 
+samples, guidance, and a full API reference.
