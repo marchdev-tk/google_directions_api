@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.4.0]
+
+* Removed flutter dependency
+
 ## [0.3.0]
 
 * Finished with request models
