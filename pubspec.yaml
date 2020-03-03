@@ -7,8 +7,6 @@ environment:
   sdk: '>=2.6.0 <3.0.0'
 
 dependencies:
-  flutter:
-    sdk: flutter
 
   google_polyline_algorithm: ^2.0.0
   http: ^0.12.0+4

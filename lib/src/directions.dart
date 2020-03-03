@@ -2,7 +2,6 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:ui';
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
@@ -102,7 +101,7 @@ class LatLng {
   }
 
   @override
-  int get hashCode => hashValues(latitude, longitude);
+  int get hashCode => latitude.hashCode + longitude.hashCode;
 }
 
 /// A latitude/longitude aligned rectangle.
@@ -160,7 +159,7 @@ class LatLngBounds {
   }
 
   @override
-  int get hashCode => hashValues(southwest, northeast);
+  int get hashCode => southwest.hashCode + northeast.hashCode;
 }
 
 /// Represents an enum of various travel modes.
