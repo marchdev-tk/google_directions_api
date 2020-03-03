@@ -56,4 +56,4 @@ Feel free to post a feature requests or report a bug [here](https://github.com/m
 
 ## TODO
 
-* Finish DirectionsRequest parameters
+* Write tests via mocks

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.0]
+
+* Finished with request models
+* Added LatLng, LatLngBounds to remove dependency on google_maps_flutter plugin
+* Added overviewPath getter for decoded overviewPolyline in DirectionsRoute
+
 ## [0.2.0]
 
 * Redesigned class names of response DTO's

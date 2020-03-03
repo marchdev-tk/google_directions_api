@@ -226,6 +226,12 @@ class DirectionsRoute {
   /// steps. (See [Leg].)
   final List<Leg> legs;
 
+  List<LatLng> get overviewPath => overviewPolyline?.points?.isNotEmpty == true
+      ? gpl
+          .decodePolyline(overviewPolyline.points)
+          .mapList((_) => LatLng._fromList(_))
+      : null;
+
   /// Contains a single points object that holds an
   /// [encoded polyline][enc_polyline] representation of the route.
   /// This polyline is an approximate (smoothed) path of the resulting
@@ -1440,42 +1446,6 @@ class DirectionsStatus {
   @override
   bool operator ==(dynamic other) =>
       other is DirectionsStatus && _name == other._name;
-
-  @override
-  String toString() => '$_name';
-}
-
-/// Represents an enum of various travel modes.
-///
-/// The valid travel modes that can be specified in a
-/// `DirectionsRequest` as well as the travel modes returned
-/// in a `DirectionsStep`. Specify these by value, or by using
-/// the constant's name.
-class TravelMode {
-  const TravelMode(this._name);
-
-  final String _name;
-
-  static final values = <TravelMode>[bicycling, driving, transit, walking];
-
-  /// Specifies a bicycling directions request.
-  static const bicycling = TravelMode('bicycling');
-
-  /// Specifies a driving directions request.
-  static const driving = TravelMode('driving');
-
-  /// Specifies a transit directions request.
-  static const transit = TravelMode('transit');
-
-  /// Specifies a walking directions request.
-  static const walking = TravelMode('walking');
-
-  @override
-  int get hashCode => _name.hashCode;
-
-  @override
-  bool operator ==(dynamic other) =>
-      other is TravelMode && _name == other._name;
 
   @override
   String toString() => '$_name';

@@ -2,20 +2,17 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:io';
+import 'dart:ui';
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
-
 import 'package:flinq/flinq.dart';
 import 'package:http/http.dart' as http;
-import 'package:google_maps_flutter/google_maps_flutter.dart'
-    show LatLng, LatLngBounds;
+import 'package:google_polyline_algorithm/google_polyline_algorithm.dart'
+    as gpl;
 
-part 'directions.dto.dart';
-
-String _addIfNotNull(String name, dynamic value) =>
-    value == null ? '' : '&$name=$value';
+part 'directions.request.dart';
+part 'directions.response.dart';
 
 /// This service is used to calculate route between two points
 class DirectionsService {
@@ -59,8 +56,8 @@ class DirectionsService {
     final response = await http.get(url);
 
     if (response.statusCode != 200) {
-      throw HttpException('${response.statusCode} (${response.reasonPhrase})',
-          uri: response.request.url);
+      throw Exception(
+          '${response.statusCode} (${response.reasonPhrase}), uri = ${response.request.url}');
     }
 
     final result = DirectionsResult.fromMap(json.decode(response.body));
@@ -69,526 +66,134 @@ class DirectionsService {
   }
 }
 
-/// Settings for route calculation.
-///
-/// `origin` and `destination` arguments are required.
-class DirectionsRequest {
-  const DirectionsRequest({
-    @required this.origin,
-    @required this.destination,
-    this.travelMode,
-    this.optimizeWaypoints,
-    this.waypoints,
-    this.alternatives,
-    this.avoidTolls,
-    this.avoidHighways,
-    this.avoidFerries,
-    this.avoidIndoor,
-    this.unitSystem,
-    this.region,
-    this.drivingOptions,
-    this.transitOptions,
-  });
-
-  /// The address, textual latitude/longitude value, or place ID
-  /// from which you wish to calculate directions.
+/// A pair of latitude and longitude coordinates, stored as degrees.
+class LatLng {
+  /// Creates a geographical location specified in degrees [latitude] and
+  /// [longitude].
   ///
-  /// This field is required.
+  /// The latitude is clamped to the inclusive interval from -90.0 to +90.0.
   ///
-  ///  * If you pass an **address**, the Directions service geocodes
-  /// the string and converts it to a latitude/longitude
-  /// coordinate to calculate directions. This coordinate may be
-  /// different from that returned by the Geocoding API, for
-  /// example a building entrance rather than its center.
-  ///
-  ///   ```origin=24+Sussex+Drive+Ottawa+ON```
-  ///
-  ///  * If you pass **coordinates**, they are used unchanged to
-  /// calculate directions. Ensure that no space exists between
-  /// the latitude and longitude values.
-  ///
-  ///   ```origin=41.43206,-81.38992```
-  ///
-  ///  * Place IDs must be prefixed with place_id:. The place ID
-  /// may only be specified if the request includes an API key or
-  /// a Google Maps Platform Premium Plan client ID. You can
-  /// retrieve place IDs from the Geocoding API and the Places
-  /// API (including Place Autocomplete). For an example using
-  /// place IDs from Place Autocomplete, see
-  /// [Place Autocomplete and Directions][place_info]. For more
-  ///  place IDs, see the [Place ID overview][place_overview].
-  ///
-  ///   ```origin=place_id:ChIJ3S-JXmauEmsRUcIaWtf4MzE```
-  ///
-  /// [place_info]: https://developers.google.com/maps/documentation/javascript/examples/places-autocomplete-directions
-  /// [place_overview]: https://developers.google.com/places/place-id
-  final dynamic origin;
+  /// The longitude is normalized to the half-open interval from -180.0
+  /// (inclusive) to +180.0 (exclusive)
+  const LatLng(double latitude, double longitude)
+      : assert(latitude != null),
+        assert(longitude != null),
+        latitude =
+            (latitude < -90.0 ? -90.0 : (90.0 < latitude ? 90.0 : latitude)),
+        longitude = (longitude + 180.0) % 360.0 - 180.0;
 
-  /// The address, textual latitude/longitude value, or place ID
-  /// to which you wish to calculate directions. The options for
-  /// the destination parameter are the same as for the [origin]
-  /// parameter, described above.
-  ///
-  /// This field is required.
-  final dynamic destination;
+  /// The latitude in degrees between -90.0 and 90.0, both inclusive.
+  final double latitude;
 
-  /// Specifies the mode of transport to use when calculating
-  /// directions. Valid values and other request details are
-  /// specified in [TravelModes].
-  ///
-  /// Default value is [TravelMode.driving]
-  final TravelMode travelMode;
+  /// The longitude in degrees between -180.0 (inclusive) and 180.0 (exclusive).
+  final double longitude;
 
-  /// Specifies an array of intermediate locations to include
-  /// along the route between the origin and destination points
-  /// as pass through or stopover locations. Waypoints alter a
-  /// route by directing it through the specified location(s).
-  /// The API supports waypoints for these travel modes: driving,
-  /// walking and bicycling; not transit. You can specify waypoints
-  /// using the following values:
-  ///
-  ///  * Latitude/longitude coordinates (`lat`/`lng`): an explicit value
-  /// pair. (`-34.92788%2C138.60008` comma, no space)
-  ///  * Place ID: The unique value specific to a location.
-  ///  * Address string (`Charlestown, Boston,MA`)
-  ///  * Encoded polyline that can be specified by a set of any of
-  /// the above. (`enc:lexeF{~wsZejrPjtye@:`)
-  final List<DirectionsWaypoint> waypoints;
+  static LatLng _fromList(List<num> list) => LatLng(
+        list[0],
+        list[1],
+      );
 
-  /// By default, the Directions service calculates a route through
-  /// the provided waypoints in their given order.
-  ///
-  /// If set to `true` will allow the Directions service to optimize
-  /// the provided route by rearranging the waypoints in a more
-  /// efficient order. (This optimization is an application of the
-  /// [traveling salesperson problem][tsp].) Travel time is the primary
-  /// factor which is optimized, but other factors such as distance,
-  /// number of turns and many more may be taken into account when
-  /// deciding which route is the most efficient. All waypoints must
-  /// be stopovers for the Directions service to optimize their route.
-  ///
-  /// If you instruct the Directions service to optimize the order of
-  /// its waypoints, their order will be returned in the waypoint_order
-  /// field within the [DirectionsRoute] object. The `waypointOrder`
-  /// field returns values which are zero-based.
-  ///
-  /// [tsp]: https://en.wikipedia.org/wiki/Travelling_salesman_problem
-  final bool optimizeWaypoints;
+  @override
+  String toString() => '$runtimeType($latitude, $longitude)';
 
-  /// If set to `true`, specifies that the Directions service may
-  /// provide more than one route alternative in the response.
-  /// Note that providing route alternatives may increase the
-  /// response time from the server. This is only available for
-  /// requests without intermediate waypoints.
-  final bool alternatives;
-
-  /// Indicates that the calculated route should avoid toll
-  /// roads/bridges.
-  final bool avoidTolls;
-
-  /// Indicates that the calculated route should avoid highways.
-  final bool avoidHighways;
-
-  /// Indicates that the calculated route should avoid ferries.
-  final bool avoidFerries;
-
-  /// Indicates that the calculated route should avoid indoor
-  /// steps for walking and transit directions.
-  final bool avoidIndoor;
-
-  /// Specifies the region code, specified as a ccTLD
-  /// ("top-level domain") two-character value.
-  ///
-  /// You can set the Directions service to return results from
-  /// a specific region by using the `region` parameter. This
-  /// parameter takes a [ccTLD][cctld] (country code top-level domain)
-  /// argument specifying the region bias. Most ccTLD codes are
-  /// identical to ISO 3166-1 codes, with some notable exceptions.
-  /// For example, the United Kingdom's ccTLD is "uk" (`.co.uk`)
-  /// while its ISO 3166-1 code is "gb" (technically for the entity
-  /// of "The United Kingdom of Great Britain and Northern Ireland").
-  ///
-  /// You may utilize any domain in which the main Google Maps
-  /// application has launched driving directions.
-  ///
-  /// [cctld]: https://en.wikipedia.org/wiki/Country_code_top-level_domain
-  final String region;
-
-  /// Specifies the unit system to use when displaying results.
-  final UnitSystem unitSystem;
-
-  final DrivingOptions drivingOptions;
-
-  final TransitOptions transitOptions;
-
-  String _convertLocation(dynamic location) {
-    if (location is LatLng) {
-      return '${location.latitude},${location.longitude}';
-    } else if (location is String && location.startsWith('place_id:')) {
-      return location;
-    } else if (location is String) {
-      location = location.replaceAll(',', ' ');
-      return location
-          .split(' ')
-          .where((_) => _.trim().isNotEmpty == true)
-          .join('+');
-    }
-
-    throw UnsupportedError(
-        'Unsupported type of argument: ${location.runtimeType}');
-  }
-
-  String _convertAvoids() {
-    final avoids = <String>[];
-
-    if (avoidTolls == true) {
-      avoids.add('tolls');
-    }
-    if (avoidHighways == true) {
-      avoids.add('highways');
-    }
-    if (avoidFerries == true) {
-      avoids.add('ferries');
-    }
-    if (avoidIndoor == true) {
-      avoids.add('indoor');
-    }
-
-    return avoids.isEmpty ? null : avoids.join('|');
+  @override
+  bool operator ==(Object o) {
+    return o is LatLng && o.latitude == latitude && o.longitude == longitude;
   }
 
   @override
-  String toString() => '?origin=${_convertLocation(origin)}&'
-      'destination=${_convertLocation(destination)}'
-      '${_addIfNotNull('mode', travelMode)}'
-      '${_addIfNotNull('alternatives', alternatives)}'
-      '${_addIfNotNull('region', region)}'
-      '${_addIfNotNull('units', unitSystem)}'
-      '${_addIfNotNull('avoid', _convertAvoids())}'
-      '${drivingOptions == null ? '' : drivingOptions.toString()}'
-      '${transitOptions == null ? '' : transitOptions.toString()}';
-// &waypoints=optimize:true|Barossa+Valley,SA|Clare,SA|Connawarra,SA|McLaren+Vale,SA
+  int get hashCode => hashValues(latitude, longitude);
 }
 
-class DirectionsWaypoint {
-  const DirectionsWaypoint({
-    this.location,
-    this.stopover,
-  });
-
-  final dynamic location;
-  final bool stopover;
-}
-
-class TransitOptions {
-  const TransitOptions({
-    this.arrivalTime,
-    this.departureTime,
-    this.modes,
-    this.routingPreference,
-  });
-
-  /// Specifies the desired time of arrival for transit directions.
-  /// You can specify either `departureTime` or `arrivalTime`, but
-  /// not both.
-  final DateTime arrivalTime;
-
-  /// Specifies the desired time of departure. The departure time
-  /// may be specified in two cases:
+/// A latitude/longitude aligned rectangle.
+///
+/// The rectangle conceptually includes all points (lat, lng) where
+/// * lat ∈ [`southwest.latitude`, `northeast.latitude`]
+/// * lng ∈ [`southwest.longitude`, `northeast.longitude`],
+///   if `southwest.longitude` ≤ `northeast.longitude`,
+/// * lng ∈ [-180, `northeast.longitude`] ∪ [`southwest.longitude`, 180],
+///   if `northeast.longitude` < `southwest.longitude`
+class LatLngBounds {
+  /// Creates geographical bounding box with the specified corners.
   ///
-  ///  * For requests where the travel mode is `transit`: You can
-  /// optionally specify one of `departureTime` or `arrivalTime`.
-  /// If neither time is specified, the `departureTime` defaults to
-  /// now (that is, the departure time defaults to the current time).
-  ///
-  ///  * For requests where the travel mode is `driving`: You can
-  /// specify the `departureTime` to receive a route and trip
-  /// duration (response field: `durationInTraffic`) that take
-  /// traffic conditions into account. The `departureTime` must be
-  /// set to the current time or some time in the future. It
-  /// cannot be in the past.
-  ///
-  /// Note: If departure time is not specified, choice of route and
-  /// duration are based on road network and average time-independent
-  /// traffic conditions. Results for a given request may vary over
-  /// time due to changes in the road network, updated average traffic
-  /// conditions, and the distributed nature of the service. Results
-  /// may also vary between nearly-equivalent routes at any time or
-  /// frequency.
-  final DateTime departureTime;
+  /// The latitude of the southwest corner cannot be larger than the
+  /// latitude of the northeast corner.
+  LatLngBounds({@required this.southwest, @required this.northeast})
+      : assert(southwest != null),
+        assert(northeast != null),
+        assert(southwest.latitude <= northeast.latitude);
 
-  /// Specifies one or more preferred modes of transit. This parameter
-  /// may only be specified for transit directions. The parameter
-  /// supports the following arguments:
-  ///
-  ///  * `bus` indicates that the calculated route should prefer travel
-  /// by bus.
-  ///  * `subway` indicates that the calculated route should prefer
-  /// travel by subway.
-  ///  * `train` indicates that the calculated route should prefer
-  /// travel by train.
-  ///  * `tram` indicates that the calculated route should prefer travel
-  /// by tram and light rail.
-  ///  * `rail` indicates that the calculated route should prefer travel
-  /// by train, tram, light rail, and subway. This is equivalent to
-  /// `transitMode=train|tram|subway`.
-  final List<TransitMode> modes;
+  /// The southwest corner of the rectangle.
+  final LatLng southwest;
 
-  /// Specifies preferences for transit routes. Using this parameter,
-  /// you can bias the options returned, rather than accepting the
-  /// default best route chosen by the API. This parameter may only
-  /// be specified for transit directions. The parameter supports the
-  /// following arguments:
-  ///
-  ///  * `lessWalking` indicates that the calculated route should
-  /// prefer limited amounts of walking.
-  ///  * `fewerTransfers` indicates that the calculated route should
-  /// prefer a limited number of transfers.
-  final TransitRoutingPreference routingPreference;
+  /// The northeast corner of the rectangle.
+  final LatLng northeast;
+
+  /// Returns whether this rectangle contains the given [LatLng].
+  bool contains(LatLng point) {
+    return _containsLatitude(point.latitude) &&
+        _containsLongitude(point.longitude);
+  }
+
+  bool _containsLatitude(double lat) {
+    return (southwest.latitude <= lat) && (lat <= northeast.latitude);
+  }
+
+  bool _containsLongitude(double lng) {
+    if (southwest.longitude <= northeast.longitude) {
+      return southwest.longitude <= lng && lng <= northeast.longitude;
+    } else {
+      return southwest.longitude <= lng || lng <= northeast.longitude;
+    }
+  }
 
   @override
-  String toString() =>
-      '${_addIfNotNull('arrival_time', arrivalTime.millisecondsSinceEpoch)}'
-      '${_addIfNotNull('departure_time', departureTime.millisecondsSinceEpoch)}'
-      '${_addIfNotNull('transit_mode', modes.map((_) => _.toString()).join('|'))}'
-      '${_addIfNotNull('transit_routing_preference', routingPreference)}';
-}
-
-class DrivingOptions {
-  const DrivingOptions({
-    this.departureTime,
-    this.trafficModel,
-  });
-
-  /// Specifies the desired time of departure. The departure time
-  /// may be specified in two cases:
-  ///
-  ///  * For requests where the travel mode is `transit`: You can
-  /// optionally specify one of `departureTime` or `arrivalTime`.
-  /// If neither time is specified, the `departureTime` defaults to
-  /// now (that is, the departure time defaults to the current time).
-  ///
-  ///  * For requests where the travel mode is `driving`: You can
-  /// specify the `departureTime` to receive a route and trip
-  /// duration (response field: `durationInTraffic`) that take
-  /// traffic conditions into account. The `departureTime` must be
-  /// set to the current time or some time in the future. It
-  /// cannot be in the past.
-  ///
-  /// Note: If departure time is not specified, choice of route and
-  /// duration are based on road network and average time-independent
-  /// traffic conditions. Results for a given request may vary over
-  /// time due to changes in the road network, updated average traffic
-  /// conditions, and the distributed nature of the service. Results
-  /// may also vary between nearly-equivalent routes at any time or
-  /// frequency.
-  final DateTime departureTime;
-
-  /// Specifies the assumptions to use when calculating time in traffic.
-  /// This setting affects the value returned in the `durationInTraffic`
-  /// field in the response, which contains the predicted time in
-  /// traffic based on historical averages. The `trafficModel`
-  /// parameter may only be specified for driving directions where
-  /// the request includes a `departureTime`.
-  ///
-  /// Defaults to `bestGuess`.
-  ///
-  /// The available values for this parameter are:
-  ///
-  ///  * `bestGuess` (default) indicates that the returned `durationInTraffic`
-  /// should be the best estimate of travel time given what is known about
-  /// both historical traffic conditions and live traffic. Live traffic
-  /// becomes more important the closer the `departureTime` is to now.
-  ///  * `pessimistic` indicates that the returned `durationInTraffic`
-  /// should be longer than the actual travel time on most days, though
-  /// occasional days with particularly bad traffic conditions may
-  /// exceedthis value.
-  ///  * `optimistic` indicates that the returned `durationInTraffic`
-  /// should be shorter than the actual travel time on most days, though
-  /// occasional days with particularly good traffic conditions may be
-  /// faster than this value.
-  ///
-  /// The default value of `bestGuess` will give the most useful
-  /// predictions for the vast majority of use cases. It is possible
-  /// the `bestGuess` travel time prediction may be shorter than
-  /// `optimistic`, or alternatively, longer than `pessimistic`, due to
-  /// the way the `bestGuess` prediction model integrates live traffic
-  /// information.
-  final TrafficModel trafficModel;
+  String toString() {
+    return '$runtimeType($southwest, $northeast)';
+  }
 
   @override
-  String toString() =>
-      '${_addIfNotNull('departure_time', departureTime.millisecondsSinceEpoch)}'
-      '${_addIfNotNull('traffic_model', trafficModel)}';
+  bool operator ==(Object o) {
+    return o is LatLngBounds &&
+        o.southwest == southwest &&
+        o.northeast == northeast;
+  }
+
+  @override
+  int get hashCode => hashValues(southwest, northeast);
 }
 
-/// Directions results contain `text` within `distance` fields
-/// that may be displayed to the user to indicate the distance
-/// of a particular "step" of the route. By default, this text
-/// uses the unit system of the origin's country or region.
+/// Represents an enum of various travel modes.
 ///
-/// For example, a route from "Chicago, IL" to "Toronto, ONT"
-/// will display results in miles, while the reverse route will
-/// display results in kilometers. You may override this unit
-/// system by setting one explicitly within the request's units
-/// parameter, passing one of the following values:
-///
-/// `metric` specifies usage of the metric system. Textual
-/// distances are returned using kilometers and meters.
-/// `imperial` specifies usage of the Imperial (English)
-/// system. Textual distances are returned using miles and feet.
-///
-/// Note: this unit system setting only affects the text displayed
-/// within distance fields. The distance fields also contain values
-/// which are always expressed in meters.
-class UnitSystem {
-  const UnitSystem(this._name);
+/// The valid travel modes that can be specified in a
+/// `DirectionsRequest` as well as the travel modes returned
+/// in a `DirectionsStep`. Specify these by value, or by using
+/// the constant's name.
+class TravelMode {
+  const TravelMode(this._name);
 
   final String _name;
 
-  static final values = <UnitSystem>[imperial, metric];
+  static final values = <TravelMode>[bicycling, driving, transit, walking];
 
-  /// Specifies usage of the metric system. Textual distances are
-  /// returned using kilometers and meters.
-  static const imperial = UnitSystem('IMPERIAL');
+  /// Specifies a bicycling directions request.
+  static const bicycling = TravelMode('bicycling');
 
-  /// Specifies usage of the Imperial (English) system. Textual
-  /// distances are returned using miles and feet.
-  static const metric = UnitSystem('METRIC');
+  /// Specifies a driving directions request.
+  static const driving = TravelMode('driving');
 
-  @override
-  String toString() => '$_name';
-}
+  /// Specifies a transit directions request.
+  static const transit = TravelMode('transit');
 
-/// Specifies one or more preferred modes of transit. This parameter
-/// may only be specified for transit directions. The parameter
-/// supports the following arguments:
-///
-///  * `bus` indicates that the calculated route should prefer travel
-/// by bus.
-///  * `subway` indicates that the calculated route should prefer
-/// travel by subway.
-///  * `train` indicates that the calculated route should prefer
-/// travel by train.
-///  * `tram` indicates that the calculated route should prefer travel
-/// by tram and light rail.
-///  * `rail` indicates that the calculated route should prefer travel
-/// by train, tram, light rail, and subway. This is equivalent to
-/// `transitMode=train|tram|subway`.
-class TransitMode {
-  const TransitMode(this._name);
-
-  final String _name;
-
-  static final values = <TransitMode>[
-    bus,
-    subway,
-    train,
-    tram,
-    rail,
-  ];
-
-  /// Indicates that the calculated route should prefer travel
-  /// by bus.
-  static const bus = TransitMode('BUS');
-
-  /// Indicates that the calculated route should prefer travel
-  /// by bus.
-  static const subway = TransitMode('SUBWAY');
-
-  /// Indicates that the calculated route should prefer travel
-  /// by bus.
-  static const train = TransitMode('TRAIN');
-
-  /// Indicates that the calculated route should prefer travel
-  /// by bus.
-  static const tram = TransitMode('TRAM');
-
-  /// Indicates that the calculated route should prefer travel
-  /// by bus.
-  static const rail = TransitMode('RAIL');
+  /// Specifies a walking directions request.
+  static const walking = TravelMode('walking');
 
   @override
-  String toString() => '$_name';
-}
-
-/// Specifies preferences for transit routes. Using this parameter,
-/// you can bias the options returned, rather than accepting the
-/// default best route chosen by the API. This parameter may only
-/// be specified for transit directions. The parameter supports the
-/// following arguments:
-///
-///  * `lessWalking` indicates that the calculated route should
-/// prefer limited amounts of walking.
-///  * `fewerTransfers` indicates that the calculated route should
-/// prefer a limited number of transfers.
-class TransitRoutingPreference {
-  const TransitRoutingPreference(this._name);
-
-  final String _name;
-
-  static final values = <TransitRoutingPreference>[lessWalking, fewerTransfers];
-
-  /// Indicates that the calculated route should prefer limited
-  /// amounts of walking.
-  static const lessWalking = TransitRoutingPreference('less_walking');
-
-  /// Indicates that the calculated route should prefer a limited
-  /// number of transfers
-  static const fewerTransfers = TransitRoutingPreference('fewer_transfers');
+  int get hashCode => _name.hashCode;
 
   @override
-  String toString() => '$_name';
-}
-
-/// Specifies the assumptions to use when calculating time in traffic.
-/// This setting affects the value returned in the `durationInTraffic`
-/// field in the response, which contains the predicted time in
-/// traffic based on historical averages. The `trafficModel`
-/// parameter may only be specified for driving directions where
-/// the request includes a `departureTime`.
-///
-/// The available values for this parameter are:
-///
-///  * `bestGuess` indicates that the returned `durationInTraffic`
-/// should be the best estimate of travel time given what is known about
-/// both historical traffic conditions and live traffic. Live traffic
-/// becomes more important the closer the `departureTime` is to now.
-///  * `pessimistic` indicates that the returned `durationInTraffic`
-/// should be longer than the actual travel time on most days, though
-/// occasional days with particularly bad traffic conditions may
-/// exceedthis value.
-///  * `optimistic` indicates that the returned `durationInTraffic`
-/// should be shorter than the actual travel time on most days, though
-/// occasional days with particularly good traffic conditions may be
-/// faster than this value.
-class TrafficModel {
-  const TrafficModel(this._name);
-
-  final String _name;
-
-  static final values = <TrafficModel>[
-    bestGuess,
-    pessimistic,
-  ];
-
-  /// Indicates that the returned `durationInTraffic`
-  /// should be the best estimate of travel time given what is known about
-  /// both historical traffic conditions and live traffic. Live traffic
-  /// becomes more important the closer the `departureTime` is to now.
-  static const bestGuess = TrafficModel('best_guess');
-
-  /// Indicates that the returned `durationInTraffic`
-  /// should be longer than the actual travel time on most days, though
-  /// occasional days with particularly bad traffic conditions may
-  /// exceedthis value.
-  static const pessimistic = TrafficModel('pessimistic');
-
-  /// Indicates that the returned `durationInTraffic`
-  /// should be shorter than the actual travel time on most days, though
-  /// occasional days with particularly good traffic conditions may be
-  /// faster than this value.
-  static const optimistic = TrafficModel('optimistic');
+  bool operator ==(dynamic other) =>
+      other is TravelMode && _name == other._name;
 
   @override
   String toString() => '$_name';
