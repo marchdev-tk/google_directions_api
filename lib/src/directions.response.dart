@@ -4,9 +4,9 @@
 
 part of 'directions.dart';
 
-LatLng _getLatLngFromMap(Map<String, dynamic> map) => map == null
+GeoCoord _getGeoCoordFromMap(Map<String, dynamic> map) => map == null
     ? null
-    : LatLng(
+    : GeoCoord(
         double.tryParse(map['lat']?.toString()),
         double.tryParse(map['lng']?.toString()),
       );
@@ -197,9 +197,9 @@ class DirectionsRoute {
   factory DirectionsRoute.fromMap(Map<String, dynamic> map) => map == null
       ? null
       : DirectionsRoute(
-          bounds: LatLngBounds(
-            northeast: _getLatLngFromMap(map['bounds']['northeast']),
-            southwest: _getLatLngFromMap(map['bounds']['southwest']),
+          bounds: GeoCoordBounds(
+            northeast: _getGeoCoordFromMap(map['bounds']['northeast']),
+            southwest: _getGeoCoordFromMap(map['bounds']['southwest']),
           ),
           copyrights: map['copyrights'] as String,
           legs: (map['legs'] as List)?.mapList((_) => Leg.fromMap(_)),
@@ -212,7 +212,7 @@ class DirectionsRoute {
         );
 
   /// Contains the viewport bounding box of the [overviewPolyline].
-  final LatLngBounds bounds;
+  final GeoCoordBounds bounds;
 
   /// Contains the copyrights text to be displayed for this route.
   /// You must handle and display this information yourself.
@@ -226,11 +226,12 @@ class DirectionsRoute {
   /// steps. (See [Leg].)
   final List<Leg> legs;
 
-  List<LatLng> get overviewPath => overviewPolyline?.points?.isNotEmpty == true
-      ? gpl
-          .decodePolyline(overviewPolyline.points)
-          .mapList((_) => LatLng._fromList(_))
-      : null;
+  List<GeoCoord> get overviewPath =>
+      overviewPolyline?.points?.isNotEmpty == true
+          ? gpl
+              .decodePolyline(overviewPolyline.points)
+              .mapList((_) => GeoCoord._fromList(_))
+          : null;
 
   /// Contains a single points object that holds an
   /// [encoded polyline][enc_polyline] representation of the route.
@@ -614,9 +615,9 @@ class Leg {
           durationInTraffic:
               DirectionsDuration.fromMap(map['duration_in_trafic']),
           endAddress: map['end_address'] as String,
-          endLocation: _getLatLngFromMap(map['end_location']),
+          endLocation: _getGeoCoordFromMap(map['end_location']),
           startAddress: map['start_address'] as String,
-          startLocation: _getLatLngFromMap(map['start_location']),
+          startLocation: _getGeoCoordFromMap(map['start_location']),
           steps: (map['steps'] as List)?.mapList((_) => Step.fromMap(_)),
         );
 
@@ -692,7 +693,7 @@ class Leg {
   /// option (usually a road) at the start and end points,
   /// `endLocation` may be different than the provided destination of
   /// this leg if, for example, a road is not near the destination.
-  final LatLng endLocation;
+  final GeoCoord endLocation;
 
   /// Contains the human-readable address (typically a street address)
   /// resulting from reverse geocoding the `startLocation` of this leg.
@@ -704,7 +705,7 @@ class Leg {
   /// road) at the start and end points, `startLocation` may be
   /// different than the provided origin of this leg if, for example,
   /// a road is not near the origin.
-  final LatLng startLocation;
+  final GeoCoord startLocation;
 
   /// contains an array of steps denoting information about each
   /// separate step of the leg of the journey.
@@ -756,7 +757,7 @@ class Leg {
 ///  * `endLocation` contains the location of the last point of this
 /// step, as a single set of lat and lng fields.
 ///
-///  * `path` contains a sequence of LatLngs describing the
+///  * `path` contains a sequence of GeoCoords describing the
 /// course of this step.
 ///
 ///  * `steps` contains detailed directions for walking or driving
@@ -791,10 +792,10 @@ class Step {
       : Step(
           distance: Distance.fromMap(map['distance']),
           duration: DirectionsDuration.fromMap(map['duration']),
-          endLocation: _getLatLngFromMap(map['end_location']),
-          startLocation: _getLatLngFromMap(map['start_location']),
+          endLocation: _getGeoCoordFromMap(map['end_location']),
+          startLocation: _getGeoCoordFromMap(map['start_location']),
           instructions: map['instructions'] as String,
-          path: (map['path'] as List)?.mapList((_) => _getLatLngFromMap(_)),
+          path: (map['path'] as List)?.mapList((_) => _getGeoCoordFromMap(_)),
           steps: (map['steps'] as List)?.mapList((_) => Step.fromMap(_)),
           transit: TransitDetails.fromMap(map['transit']),
           travelMode: TravelMode(map['travel_mode']),
@@ -811,19 +812,19 @@ class Step {
 
   /// Contains the location of the last point of this step, as a
   /// single set of lat and lng fields.
-  final LatLng endLocation;
+  final GeoCoord endLocation;
 
   /// Contains the location of the starting point of this step, as
   /// a single set of lat and lng fields.
-  final LatLng startLocation;
+  final GeoCoord startLocation;
 
   /// Contains formatted instructions for this step,
   /// presented as a text string. (Corresponds to instructions in
   /// the [Directions.Step interface][directions_step_interface].)
   final String instructions;
 
-  /// Contains a sequence of LatLngs describing the course of this step.
-  final List<LatLng> path;
+  /// Contains a sequence of GeoCoords describing the course of this step.
+  final List<GeoCoord> path;
 
   /// Contains detailed directions for walking or driving
   /// steps in transit directions. Substeps are only available when
@@ -1292,7 +1293,7 @@ class TransitStop {
       ? null
       : TransitStop(
           name: map['name'] as String,
-          location: _getLatLngFromMap(map['location']),
+          location: _getGeoCoordFromMap(map['location']),
         );
 
   /// The name of the transit station/stop. eg. "Union Square".
@@ -1300,7 +1301,7 @@ class TransitStop {
 
   /// The location of the transit station/stop, represented as a
   /// lat and lng field
-  final LatLng location;
+  final GeoCoord location;
 }
 
 /// Provides information about the operator of the line, including

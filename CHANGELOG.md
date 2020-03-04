@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.5.0]
+
+* Redesigned LatLng, LatLngBounds due to ambiguous class names when using google_maps_flutter or google_maps packages
+
 ## [0.4.0]
 
 * Removed flutter dependency

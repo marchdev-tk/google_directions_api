@@ -8,7 +8,7 @@ String _addIfNotNull(String name, dynamic value) =>
     value == null ? '' : '&$name=$value';
 
 String _convertLocation(dynamic location) {
-  if (location is LatLng) {
+  if (location is GeoCoord) {
     return '${location.latitude},${location.longitude}';
   } else if (location is String &&
       (location.startsWith('place_id:') || location.startsWith('enc:'))) {

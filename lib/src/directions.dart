@@ -66,7 +66,7 @@ class DirectionsService {
 }
 
 /// A pair of latitude and longitude coordinates, stored as degrees.
-class LatLng {
+class GeoCoord {
   /// Creates a geographical location specified in degrees [latitude] and
   /// [longitude].
   ///
@@ -74,7 +74,7 @@ class LatLng {
   ///
   /// The longitude is normalized to the half-open interval from -180.0
   /// (inclusive) to +180.0 (exclusive)
-  const LatLng(double latitude, double longitude)
+  const GeoCoord(double latitude, double longitude)
       : assert(latitude != null),
         assert(longitude != null),
         latitude =
@@ -87,7 +87,7 @@ class LatLng {
   /// The longitude in degrees between -180.0 (inclusive) and 180.0 (exclusive).
   final double longitude;
 
-  static LatLng _fromList(List<num> list) => LatLng(
+  static GeoCoord _fromList(List<num> list) => GeoCoord(
         list[0],
         list[1],
       );
@@ -97,7 +97,7 @@ class LatLng {
 
   @override
   bool operator ==(Object o) {
-    return o is LatLng && o.latitude == latitude && o.longitude == longitude;
+    return o is GeoCoord && o.latitude == latitude && o.longitude == longitude;
   }
 
   @override
@@ -112,24 +112,24 @@ class LatLng {
 ///   if `southwest.longitude` ≤ `northeast.longitude`,
 /// * lng ∈ [-180, `northeast.longitude`] ∪ [`southwest.longitude`, 180],
 ///   if `northeast.longitude` < `southwest.longitude`
-class LatLngBounds {
+class GeoCoordBounds {
   /// Creates geographical bounding box with the specified corners.
   ///
   /// The latitude of the southwest corner cannot be larger than the
   /// latitude of the northeast corner.
-  LatLngBounds({@required this.southwest, @required this.northeast})
+  GeoCoordBounds({@required this.southwest, @required this.northeast})
       : assert(southwest != null),
         assert(northeast != null),
         assert(southwest.latitude <= northeast.latitude);
 
   /// The southwest corner of the rectangle.
-  final LatLng southwest;
+  final GeoCoord southwest;
 
   /// The northeast corner of the rectangle.
-  final LatLng northeast;
+  final GeoCoord northeast;
 
-  /// Returns whether this rectangle contains the given [LatLng].
-  bool contains(LatLng point) {
+  /// Returns whether this rectangle contains the given [GeoCoord].
+  bool contains(GeoCoord point) {
     return _containsLatitude(point.latitude) &&
         _containsLongitude(point.longitude);
   }
@@ -153,7 +153,7 @@ class LatLngBounds {
 
   @override
   bool operator ==(Object o) {
-    return o is LatLngBounds &&
+    return o is GeoCoordBounds &&
         o.southwest == southwest &&
         o.northeast == northeast;
   }
