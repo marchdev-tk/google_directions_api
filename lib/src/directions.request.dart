@@ -29,22 +29,22 @@ String _convertLocation(dynamic location) {
 ///
 /// `origin` and `destination` arguments are required.
 class DirectionsRequest {
-  const DirectionsRequest({
-    @required this.origin,
-    @required this.destination,
-    this.travelMode,
-    this.optimizeWaypoints,
-    this.waypoints,
-    this.alternatives,
-    this.avoidTolls,
-    this.avoidHighways,
-    this.avoidFerries,
-    this.avoidIndoor,
-    this.unitSystem,
-    this.region,
-    this.drivingOptions,
-    this.transitOptions,
-  });
+  const DirectionsRequest(
+      {@required this.origin,
+      @required this.destination,
+      this.travelMode,
+      this.optimizeWaypoints,
+      this.waypoints,
+      this.alternatives,
+      this.avoidTolls,
+      this.avoidHighways,
+      this.avoidFerries,
+      this.avoidIndoor,
+      this.unitSystem,
+      this.region,
+      this.drivingOptions,
+      this.transitOptions,
+      this.language});
 
   /// The address, textual latitude/longitude value, or place ID
   /// from which you wish to calculate directions.
@@ -183,6 +183,14 @@ class DirectionsRequest {
   /// [TravelMode].
   final TransitOptions transitOptions;
 
+  /// The language in which to return results
+  /// If language is not supplied, the API attempts to use the preferred
+  /// language as specified in the Accept-Language header, or the native
+  /// language of the domain from which the request is sent.
+  /// For a complete list of the supported languages visit
+  /// https://developers.google.com/maps/faq#languagesupport
+  final String language;
+
   String _convertAvoids() {
     final avoids = <String>[];
 
@@ -218,6 +226,7 @@ class DirectionsRequest {
       '${_addIfNotNull('avoid', _convertAvoids())}'
       '${_addIfNotNull('units', unitSystem)}'
       '${_addIfNotNull('region', region)}'
+      '${_addIfNotNull('language', language)}'
       '${drivingOptions == null ? '' : drivingOptions.toString()}'
       '${transitOptions == null ? '' : transitOptions.toString()}';
 }

@@ -794,7 +794,7 @@ class Step {
           duration: DirectionsDuration.fromMap(map['duration']),
           endLocation: _getGeoCoordFromMap(map['end_location']),
           startLocation: _getGeoCoordFromMap(map['start_location']),
-          instructions: map['instructions'] as String,
+          instructions: map['html_instructions'] as String,
           path: (map['path'] as List)?.mapList((_) => _getGeoCoordFromMap(_)),
           steps: (map['steps'] as List)?.mapList((_) => Step.fromMap(_)),
           transit: TransitDetails.fromMap(map['transit']),
