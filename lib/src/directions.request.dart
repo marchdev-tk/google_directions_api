@@ -1,4 +1,4 @@
-// Copyright (c) 2020, the MarchDev Toolkit project authors. Please see the AUTHORS file
+// Copyright (c) 2021, the MarchDev Toolkit project authors. Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
@@ -17,7 +17,7 @@ String _convertLocation(dynamic location) {
     location = location.replaceAll(', ', ',');
     return location
         .split(' ')
-        .where((_) => _.trim().isNotEmpty == true)
+        .where((dynamic _) => _.trim().isNotEmpty == true)
         .join('+');
   }
 
@@ -30,8 +30,8 @@ String _convertLocation(dynamic location) {
 /// `origin` and `destination` arguments are required.
 class DirectionsRequest {
   const DirectionsRequest({
-    @required this.origin,
-    @required this.destination,
+    required this.origin,
+    required this.destination,
     this.travelMode,
     this.optimizeWaypoints,
     this.waypoints,
@@ -93,7 +93,7 @@ class DirectionsRequest {
   /// specified in [TravelModes].
   ///
   /// Default value is [TravelMode.driving]
-  final TravelMode travelMode;
+  final TravelMode? travelMode;
 
   /// Specifies an array of intermediate locations to include
   /// along the route between the origin and destination points
@@ -110,7 +110,7 @@ class DirectionsRequest {
   ///  * Address string (`Charlestown, Boston,MA`)
   ///  * Encoded polyline that can be specified by a set of any of
   /// the above. (`enc:lexeF{~wsZejrPjtye@:`)
-  final List<DirectionsWaypoint> waypoints;
+  final List<DirectionsWaypoint>? waypoints;
 
   /// By default, the Directions service calculates a route through
   /// the provided waypoints in their given order.
@@ -130,28 +130,28 @@ class DirectionsRequest {
   /// field returns values which are zero-based.
   ///
   /// [tsp]: https://en.wikipedia.org/wiki/Travelling_salesman_problem
-  final bool optimizeWaypoints;
+  final bool? optimizeWaypoints;
 
   /// If set to `true`, specifies that the Directions service may
   /// provide more than one route alternative in the response.
   /// Note that providing route alternatives may increase the
   /// response time from the server. This is only available for
   /// requests without intermediate waypoints.
-  final bool alternatives;
+  final bool? alternatives;
 
   /// Indicates that the calculated route should avoid toll
   /// roads/bridges.
-  final bool avoidTolls;
+  final bool? avoidTolls;
 
   /// Indicates that the calculated route should avoid highways.
-  final bool avoidHighways;
+  final bool? avoidHighways;
 
   /// Indicates that the calculated route should avoid ferries.
-  final bool avoidFerries;
+  final bool? avoidFerries;
 
   /// Indicates that the calculated route should avoid indoor
   /// steps for walking and transit directions.
-  final bool avoidIndoor;
+  final bool? avoidIndoor;
 
   /// Specifies the region code, specified as a ccTLD
   /// ("top-level domain") two-character value.
@@ -169,21 +169,21 @@ class DirectionsRequest {
   /// application has launched driving directions.
   ///
   /// [cctld]: https://en.wikipedia.org/wiki/Country_code_top-level_domain
-  final String region;
+  final String? region;
 
   /// Specifies the unit system to use when displaying results.
-  final UnitSystem unitSystem;
+  final UnitSystem? unitSystem;
 
   /// Specifies the desired time of departure and/or desired assumption
   /// of time in traffic calculation for `non-transit` [TravelMode].
-  final DrivingOptions drivingOptions;
+  final DrivingOptions? drivingOptions;
 
   /// Specifies the desired time of arrival/departure and/or desired
   /// transit types and/or desired routing preference for `transit`
   /// [TravelMode].
-  final TransitOptions transitOptions;
+  final TransitOptions? transitOptions;
 
-  String _convertAvoids() {
+  String? _convertAvoids() {
     final avoids = <String>[];
 
     if (avoidTolls == true) {
@@ -202,11 +202,11 @@ class DirectionsRequest {
     return avoids.isEmpty ? null : avoids.join('|');
   }
 
-  String _convertWaypoints() {
+  String? _convertWaypoints() {
     if (waypoints?.isEmpty != false) return null;
 
     return (optimizeWaypoints == true ? 'optimize:true|' : '') +
-        waypoints.mapList((_) => _.toString()).join('|');
+        waypoints!.mapList((_) => _.toString()).join('|');
   }
 
   @override
@@ -362,7 +362,7 @@ class TransitOptions {
   /// Specifies the desired time of arrival for transit directions.
   /// You can specify either `departureTime` or `arrivalTime`, but
   /// not both.
-  final DateTime arrivalTime;
+  final DateTime? arrivalTime;
 
   /// Specifies the desired time of departure. The departure time
   /// may be specified in two cases:
@@ -386,7 +386,7 @@ class TransitOptions {
   /// conditions, and the distributed nature of the service. Results
   /// may also vary between nearly-equivalent routes at any time or
   /// frequency.
-  final DateTime departureTime;
+  final DateTime? departureTime;
 
   /// Specifies one or more preferred modes of transit. This parameter
   /// may only be specified for transit directions. The parameter
@@ -403,7 +403,7 @@ class TransitOptions {
   ///  * `rail` indicates that the calculated route should prefer travel
   /// by train, tram, light rail, and subway. This is equivalent to
   /// `transitMode=train|tram|subway`.
-  final List<TransitMode> modes;
+  final List<TransitMode>? modes;
 
   /// Specifies preferences for transit routes. Using this parameter,
   /// you can bias the options returned, rather than accepting the
@@ -415,13 +415,13 @@ class TransitOptions {
   /// prefer limited amounts of walking.
   ///  * `fewerTransfers` indicates that the calculated route should
   /// prefer a limited number of transfers.
-  final TransitRoutingPreference routingPreference;
+  final TransitRoutingPreference? routingPreference;
 
   @override
   String toString() =>
-      '${_addIfNotNull('arrival_time', arrivalTime.millisecondsSinceEpoch)}'
-      '${_addIfNotNull('departure_time', departureTime.millisecondsSinceEpoch)}'
-      '${_addIfNotNull('transit_mode', modes.map((_) => _.toString()).join('|'))}'
+      '${_addIfNotNull('arrival_time', arrivalTime!.millisecondsSinceEpoch)}'
+      '${_addIfNotNull('departure_time', departureTime!.millisecondsSinceEpoch)}'
+      '${_addIfNotNull('transit_mode', modes!.map((_) => _.toString()).join('|'))}'
       '${_addIfNotNull('transit_routing_preference', routingPreference)}';
 }
 
@@ -510,7 +510,7 @@ class DrivingOptions {
   /// conditions, and the distributed nature of the service. Results
   /// may also vary between nearly-equivalent routes at any time or
   /// frequency.
-  final DateTime departureTime;
+  final DateTime? departureTime;
 
   /// Specifies the assumptions to use when calculating time in traffic.
   /// This setting affects the value returned in the `durationInTraffic`
@@ -542,11 +542,11 @@ class DrivingOptions {
   /// `optimistic`, or alternatively, longer than `pessimistic`, due to
   /// the way the `bestGuess` prediction model integrates live traffic
   /// information.
-  final TrafficModel trafficModel;
+  final TrafficModel? trafficModel;
 
   @override
   String toString() =>
-      '${_addIfNotNull('departure_time', departureTime.millisecondsSinceEpoch)}'
+      '${_addIfNotNull('departure_time', departureTime!.millisecondsSinceEpoch)}'
       '${_addIfNotNull('traffic_model', trafficModel)}';
 }
 

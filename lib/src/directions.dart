@@ -1,14 +1,13 @@
-// Copyright (c) 2020, the MarchDev Toolkit project authors. Please see the AUTHORS file
+// Copyright (c) 2021, the MarchDev Toolkit project authors. Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:convert';
 
-import 'package:meta/meta.dart';
 import 'package:flinq/flinq.dart';
-import 'package:http/http.dart' as http;
 import 'package:google_polyline_algorithm/google_polyline_algorithm.dart'
     as gpl;
+import 'package:http/http.dart' as http;
 
 part 'directions.request.dart';
 part 'directions.response.dart';
@@ -18,7 +17,7 @@ class DirectionsService {
   static const _directionApiUrl =
       'https://maps.googleapis.com/maps/api/directions/json';
 
-  static String _apiKey;
+  static String? _apiKey;
 
   /// Initializer of [GoogleMap].
   ///
@@ -27,7 +26,7 @@ class DirectionsService {
   static void init(String apiKey) => _apiKey = apiKey;
 
   /// Gets an google API key
-  static String get apiKey => _apiKey;
+  static String? get apiKey => _apiKey;
 
   /// Calculates route between two points.
   ///
@@ -37,26 +36,14 @@ class DirectionsService {
   /// `callback` argument will be called when route calculations finished.
   Future<void> route(
     DirectionsRequest request,
-    void Function(DirectionsResult, DirectionsStatus) callback,
+    void Function(DirectionsResult, DirectionsStatus?) callback,
   ) async {
-    assert(() {
-      if (request == null) {
-        throw ArgumentError.notNull('request');
-      }
-
-      if (request == null) {
-        throw ArgumentError.notNull('callback');
-      }
-
-      return true;
-    }());
-
     final url = '$_directionApiUrl${request.toString()}&key=$apiKey';
-    final response = await http.get(url);
+    final response = await http.get(Uri.parse(url));
 
     if (response.statusCode != 200) {
       throw Exception(
-          '${response.statusCode} (${response.reasonPhrase}), uri = ${response.request.url}');
+          '${response.statusCode} (${response.reasonPhrase}), uri = ${response.request!.url}');
     }
 
     final result = DirectionsResult.fromMap(json.decode(response.body));
@@ -75,9 +62,7 @@ class GeoCoord {
   /// The longitude is normalized to the half-open interval from -180.0
   /// (inclusive) to +180.0 (exclusive)
   const GeoCoord(double latitude, double longitude)
-      : assert(latitude != null),
-        assert(longitude != null),
-        latitude =
+      : latitude =
             (latitude < -90.0 ? -90.0 : (90.0 < latitude ? 90.0 : latitude)),
         longitude = (longitude + 180.0) % 360.0 - 180.0;
 
@@ -88,8 +73,8 @@ class GeoCoord {
   final double longitude;
 
   static GeoCoord _fromList(List<num> list) => GeoCoord(
-        list[0],
-        list[1],
+        list[0] as double,
+        list[1] as double,
       );
 
   @override
@@ -117,10 +102,8 @@ class GeoCoordBounds {
   ///
   /// The latitude of the southwest corner cannot be larger than the
   /// latitude of the northeast corner.
-  GeoCoordBounds({@required this.southwest, @required this.northeast})
-      : assert(southwest != null),
-        assert(northeast != null),
-        assert(southwest.latitude <= northeast.latitude);
+  GeoCoordBounds({required this.southwest, required this.northeast})
+      : assert(southwest.latitude <= northeast.latitude);
 
   /// The southwest corner of the rectangle.
   final GeoCoord southwest;
@@ -195,5 +178,5 @@ class TravelMode {
       other is TravelMode && _name == other._name;
 
   @override
-  String toString() => '$_name';
+  String toString() => _name;
 }
