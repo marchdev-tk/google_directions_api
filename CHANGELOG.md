@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.0
+
+* Fixed parsing of `instructions` (changed to `html_instructions`) for `Step`
+* Added language parameter to `DirectionsRequest`
+
 ## 0.6.0
 
 * Updated to NNBD
