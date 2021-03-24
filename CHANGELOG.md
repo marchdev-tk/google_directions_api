@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.0
+
+* Fixed waypoint order parsing
+* Added polyline parsing to `Step`
+
 ## 0.7.0
 
 * Fixed parsing of `instructions` (changed to `html_instructions`) for `Step`

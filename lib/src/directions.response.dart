@@ -204,7 +204,7 @@ class DirectionsRoute {
         overviewPolyline: OverviewPolyline.fromMap(map['overview_polyline']),
         summary: map['summary'] as String?,
         warnings: (map['warnings'] as List?)?.mapList((_) => _ as String?),
-        waypointOrder: (map['waypointOrder'] as List?)
+        waypointOrder: (map['waypoint_order'] as List?)
             ?.mapList((_) => num.tryParse(_.toString())),
         fare: Fare.fromMap(map['fare']),
       );
@@ -780,6 +780,7 @@ class Step {
     this.steps,
     this.transit,
     this.travelMode,
+    this.polyline,
   });
 
   factory Step.fromMap(Map<String, dynamic> map) => Step(
@@ -792,6 +793,7 @@ class Step {
         steps: (map['steps'] as List?)?.mapList((_) => Step.fromMap(_)),
         transit: TransitDetails.fromMap(map['transit']),
         travelMode: TravelMode(map['travel_mode']),
+        polyline: OverviewPolyline.fromMap(map['polyline']),
       );
 
   /// Contains the distance covered by this step until the next
@@ -817,6 +819,7 @@ class Step {
   final String? instructions;
 
   /// Contains a sequence of GeoCoords describing the course of this step.
+  @Deprecated('Use polyline parameter instead')
   final List<GeoCoord?>? path;
 
   /// Contains detailed directions for walking or driving
@@ -833,6 +836,9 @@ class Step {
 
   /// Contains the type of travel mode used.
   final TravelMode? travelMode;
+
+  /// Contains a points describing the course of this step.
+  final OverviewPolyline? polyline;
 }
 
 /// Transit directions return additional information that is not
