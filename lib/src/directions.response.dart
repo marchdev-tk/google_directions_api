@@ -206,7 +206,7 @@ class DirectionsRoute {
         warnings: (map['warnings'] as List?)?.mapList((_) => _ as String?),
         waypointOrder: (map['waypoint_order'] as List?)
             ?.mapList((_) => num.tryParse(_.toString())),
-        fare: Fare.fromMap(map['fare']),
+        fare: map['fare'] != null ? Fare.fromMap(map['fare']) : null,
       );
 
   /// Contains the viewport bounding box of the [overviewPolyline].
@@ -603,12 +603,17 @@ class Leg {
   });
 
   factory Leg.fromMap(Map<String, dynamic> map) => Leg(
-        arrivalTime: Time.fromMap(map['arrival_time']),
-        departureTime: Time.fromMap(map['departure_time']),
+        arrivalTime: map['arrival_time'] != null
+            ? Time.fromMap(map['arrival_time'])
+            : null,
+        departureTime: map['departure_time'] != null
+            ? Time.fromMap(map['departure_time'])
+            : null,
         distance: Distance.fromMap(map['distance']),
         duration: DirectionsDuration.fromMap(map['duration']),
-        durationInTraffic:
-            DirectionsDuration.fromMap(map['duration_in_trafic']),
+        durationInTraffic: map['duration_in_trafic'] != null
+            ? DirectionsDuration.fromMap(map['duration_in_trafic'])
+            : null,
         endAddress: map['end_address'] as String?,
         endLocation: _getGeoCoordFromMap(map['end_location']),
         startAddress: map['start_address'] as String?,
@@ -791,7 +796,9 @@ class Step {
         instructions: map['html_instructions'] as String?,
         path: (map['path'] as List?)?.mapList((_) => _getGeoCoordFromMap(_)),
         steps: (map['steps'] as List?)?.mapList((_) => Step.fromMap(_)),
-        transit: TransitDetails.fromMap(map['transit']),
+        transit: map['transit'] != null
+            ? TransitDetails.fromMap(map['transit'])
+            : null,
         travelMode: TravelMode(map['travel_mode']),
         polyline: OverviewPolyline.fromMap(map['polyline']),
       );

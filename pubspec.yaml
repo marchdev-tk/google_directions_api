@@ -1,5 +1,5 @@
 name: google_directions_api
-version: 0.8.0
+version: 0.8.0+1
 homepage: https://github.com/marchdev-tk/google_directions_api
 description: The Directions API is a service that calculates directions between locations. You can search for directions for several modes of transportation.
 

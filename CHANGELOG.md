@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.0+1
+
+* Fixed response parsing when using `TravelMode.walking`
+
 ## 0.8.0
 
 * Fixed waypoint order parsing
