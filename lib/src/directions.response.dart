@@ -43,7 +43,7 @@ class DirectionsResult {
             ?.mapList((_) => DirectionsRoute.fromMap(_)),
         geocodedWaypoints:
             (map[''] as List?)?.mapList((_) => GeocodedWaypoint.fromMap(_)),
-        status: DirectionsStatus(map['status']),
+        status: map['status'] != null ? DirectionsStatus(map['status']) : null,
         errorMessage: map['error_message'] as String?,
         availableTravelModes: (map['available_travel_modes'] as List?)
             ?.mapList((_) => TravelMode(_)),
@@ -201,12 +201,14 @@ class DirectionsRoute {
         ),
         copyrights: map['copyrights'] as String?,
         legs: (map['legs'] as List?)?.mapList((_) => Leg.fromMap(_)),
-        overviewPolyline: OverviewPolyline.fromMap(map['overview_polyline']),
+        overviewPolyline: map['overview_polyline'] != null
+            ? OverviewPolyline.fromMap(map['overview_polyline'])
+            : null,
         summary: map['summary'] as String?,
         warnings: (map['warnings'] as List?)?.mapList((_) => _ as String?),
         waypointOrder: (map['waypoint_order'] as List?)
             ?.mapList((_) => num.tryParse(_.toString())),
-        fare: Fare.fromMap(map['fare']),
+        fare: map['fare'] != null ? Fare.fromMap(map['fare']) : null,
       );
 
   /// Contains the viewport bounding box of the [overviewPolyline].
@@ -603,12 +605,20 @@ class Leg {
   });
 
   factory Leg.fromMap(Map<String, dynamic> map) => Leg(
-        arrivalTime: Time.fromMap(map['arrival_time']),
-        departureTime: Time.fromMap(map['departure_time']),
-        distance: Distance.fromMap(map['distance']),
-        duration: DirectionsDuration.fromMap(map['duration']),
-        durationInTraffic:
-            DirectionsDuration.fromMap(map['duration_in_trafic']),
+        arrivalTime: map['arrival_time'] != null
+            ? Time.fromMap(map['arrival_time'])
+            : null,
+        departureTime: map['departure_time'] != null
+            ? Time.fromMap(map['departure_time'])
+            : null,
+        distance:
+            map['distance'] != null ? Distance.fromMap(map['distance']) : null,
+        duration: map['duration'] != null
+            ? DirectionsDuration.fromMap(map['duration'])
+            : null,
+        durationInTraffic: map['duration_in_trafic'] != null
+            ? DirectionsDuration.fromMap(map['duration_in_trafic'])
+            : null,
         endAddress: map['end_address'] as String?,
         endLocation: _getGeoCoordFromMap(map['end_location']),
         startAddress: map['start_address'] as String?,
@@ -784,16 +794,24 @@ class Step {
   });
 
   factory Step.fromMap(Map<String, dynamic> map) => Step(
-        distance: Distance.fromMap(map['distance']),
-        duration: DirectionsDuration.fromMap(map['duration']),
+        distance:
+            map['distance'] != null ? Distance.fromMap(map['distance']) : null,
+        duration: map['duration'] != null
+            ? DirectionsDuration.fromMap(map['duration'])
+            : null,
         endLocation: _getGeoCoordFromMap(map['end_location']),
         startLocation: _getGeoCoordFromMap(map['start_location']),
         instructions: map['html_instructions'] as String?,
         path: (map['path'] as List?)?.mapList((_) => _getGeoCoordFromMap(_)),
         steps: (map['steps'] as List?)?.mapList((_) => Step.fromMap(_)),
-        transit: TransitDetails.fromMap(map['transit']),
-        travelMode: TravelMode(map['travel_mode']),
-        polyline: OverviewPolyline.fromMap(map['polyline']),
+        transit: map['transit'] != null
+            ? TransitDetails.fromMap(map['transit'])
+            : null,
+        travelMode:
+            map['travel_mode'] != null ? TravelMode(map['travel_mode']) : null,
+        polyline: map['polyline'] != null
+            ? OverviewPolyline.fromMap(map['polyline'])
+            : null,
       );
 
   /// Contains the distance covered by this step until the next
@@ -940,13 +958,21 @@ class TransitDetails {
   });
 
   factory TransitDetails.fromMap(Map<String, dynamic> map) => TransitDetails(
-        arrivalStop: TransitStop.fromMap(map['arrival_stop']),
-        departureStop: TransitStop.fromMap(map['departure_stop']),
-        arrivalTime: Time.fromMap(map['arrival_time']),
-        departureTime: Time.fromMap(map['departure_time']),
+        arrivalStop: map['arrival_stop'] != null
+            ? TransitStop.fromMap(map['arrival_stop'])
+            : null,
+        departureStop: map['departure_stop'] != null
+            ? TransitStop.fromMap(map['departure_stop'])
+            : null,
+        arrivalTime: map['arrival_time'] != null
+            ? Time.fromMap(map['arrival_time'])
+            : null,
+        departureTime: map['departure_time'] != null
+            ? Time.fromMap(map['departure_time'])
+            : null,
         headsign: map['headsign'] as String?,
         headway: map['headway'] as num?,
-        line: TransitLine.fromMap(map['line']),
+        line: map['line'] != null ? TransitLine.fromMap(map['line']) : null,
         numStops: map['num_stops'] as num?,
         tripShortName: map['trip_short_name'] as String?,
       );
@@ -1076,7 +1102,8 @@ class TransitLine {
         url: map['url'] as String?,
         icon: map['icon'] as String?,
         textColor: map['text_color'] as String?,
-        vehicle: Vehicle.fromMap(map['vehicle']),
+        vehicle:
+            map['vehicle'] != null ? Vehicle.fromMap(map['vehicle']) : null,
       );
 
   /// Contains the full name of this transit line. eg. "7 Avenue Express".
@@ -1160,7 +1187,7 @@ class Distance {
 
   factory Distance.fromMap(Map<String, dynamic> map) => Distance(
         text: map['text'] as String?,
-        value: map['value'],
+        value: map['value'] as num?,
       );
 
   /// Contains a human-readable representation of the
@@ -1186,7 +1213,7 @@ class DirectionsDuration {
   factory DirectionsDuration.fromMap(Map<String, dynamic> map) =>
       DirectionsDuration(
         text: map['text'] as String?,
-        value: map['value'],
+        value: map['value'] as num?,
       );
 
   /// Contains a human-readable representation of the duration.
@@ -1336,7 +1363,7 @@ class Vehicle {
 
   factory Vehicle.fromMap(Map<String, dynamic> map) => Vehicle(
         name: map['name'] as String?,
-        type: VehicleType(map['type']),
+        type: map['type'] != null ? VehicleType(map['type']) : null,
         icon: map['icon'] as String?,
         localIcon: map['localIcon'] as String?,
       );
