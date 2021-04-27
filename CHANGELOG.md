@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.0
+
+* Added null checks for `fromMap` constructors
+
 ## 0.8.0
 
 * Fixed waypoint order parsing
