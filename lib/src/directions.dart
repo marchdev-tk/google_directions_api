@@ -81,8 +81,10 @@ class GeoCoord {
   String toString() => '$runtimeType($latitude, $longitude)';
 
   @override
-  bool operator ==(Object o) {
-    return o is GeoCoord && o.latitude == latitude && o.longitude == longitude;
+  bool operator ==(Object other) {
+    return other is GeoCoord &&
+        other.latitude == latitude &&
+        other.longitude == longitude;
   }
 
   @override
@@ -135,10 +137,10 @@ class GeoCoordBounds {
   }
 
   @override
-  bool operator ==(Object o) {
-    return o is GeoCoordBounds &&
-        o.southwest == southwest &&
-        o.northeast == northeast;
+  bool operator ==(Object other) {
+    return other is GeoCoordBounds &&
+        other.southwest == southwest &&
+        other.northeast == northeast;
   }
 
   @override

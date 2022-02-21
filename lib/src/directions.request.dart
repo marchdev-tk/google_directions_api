@@ -595,7 +595,7 @@ class UnitSystem {
   static const metric = UnitSystem('METRIC');
 
   @override
-  String toString() => '$_name';
+  String toString() => _name;
 }
 
 /// Specifies one or more preferred modes of transit. This parameter
@@ -647,7 +647,7 @@ class TransitMode {
   static const rail = TransitMode('RAIL');
 
   @override
-  String toString() => '$_name';
+  String toString() => _name;
 }
 
 /// Specifies preferences for transit routes. Using this parameter,
@@ -676,7 +676,7 @@ class TransitRoutingPreference {
   static const fewerTransfers = TransitRoutingPreference('fewer_transfers');
 
   @override
-  String toString() => '$_name';
+  String toString() => _name;
 }
 
 /// Specifies the assumptions to use when calculating time in traffic.
@@ -729,5 +729,5 @@ class TrafficModel {
   static const optimistic = TrafficModel('optimistic');
 
   @override
-  String toString() => '$_name';
+  String toString() => _name;
 }
