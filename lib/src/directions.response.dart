@@ -616,8 +616,8 @@ class Leg {
         duration: map['duration'] != null
             ? DirectionsDuration.fromMap(map['duration'])
             : null,
-        durationInTraffic: map['duration_in_trafic'] != null
-            ? DirectionsDuration.fromMap(map['duration_in_trafic'])
+        durationInTraffic: map['duration_in_traffic'] != null
+            ? DirectionsDuration.fromMap(map['duration_in_traffic'])
             : null,
         endAddress: map['end_address'] as String?,
         endLocation: _getGeoCoordFromMap(map['end_location']),
