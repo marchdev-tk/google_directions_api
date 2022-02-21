@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.1
+
+* Fixed misnaming of `duration_in_trafic`
+
 ## 0.9.0
 
 * Added null checks for `fromMap` constructors
