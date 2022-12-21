@@ -625,9 +625,8 @@ class Leg {
         startAddress: map['start_address'] as String?,
         startLocation: _getGeoCoordFromMap(map['start_location']),
         steps: (map['steps'] as List?)?.mapList((_) => Step.fromMap(_)),
-        viaWaypoint: map['via_waypoint'] != null
-            ? ViaWaypoint.fromMap(map['via_waypoint'])
-            : null,
+        viaWaypoint: (map['via_waypoint'] as List?)
+            ?.mapList((_) => ViaWaypoint.fromMap(_)),
       );
 
   /// Contains the estimated time of arrival for this leg. This property
@@ -722,7 +721,7 @@ class Leg {
 
   /// The locations of via waypoints along this leg.
   /// contains info about points through which the route was laid
-  final ViaWaypoint? viaWaypoint;
+  final List<ViaWaypoint>? viaWaypoint;
 }
 
 /// Each element in the steps array defines a single step of the
