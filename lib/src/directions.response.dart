@@ -804,8 +804,8 @@ class Step {
         instructions: map['html_instructions'] as String?,
         path: (map['path'] as List?)?.mapList((_) => _getGeoCoordFromMap(_)),
         steps: (map['steps'] as List?)?.mapList((_) => Step.fromMap(_)),
-        transit: map['transit'] != null
-            ? TransitDetails.fromMap(map['transit'])
+        transit: map['transit_details'] != null
+            ? TransitDetails.fromMap(map['transit_details'])
             : null,
         travelMode:
             map['travel_mode'] != null ? TravelMode(map['travel_mode']) : null,
