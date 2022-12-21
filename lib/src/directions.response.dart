@@ -602,6 +602,7 @@ class Leg {
     this.startAddress,
     this.startLocation,
     this.steps,
+    this.viaWaypoint,
   });
 
   factory Leg.fromMap(Map<String, dynamic> map) => Leg(
@@ -624,6 +625,9 @@ class Leg {
         startAddress: map['start_address'] as String?,
         startLocation: _getGeoCoordFromMap(map['start_location']),
         steps: (map['steps'] as List?)?.mapList((_) => Step.fromMap(_)),
+        viaWaypoint: map['via_waypoint'] != null
+            ? ViaWaypoint.fromMap(map['via_waypoint'])
+            : null,
       );
 
   /// Contains the estimated time of arrival for this leg. This property
@@ -715,6 +719,10 @@ class Leg {
   /// contains an array of steps denoting information about each
   /// separate step of the leg of the journey.
   final List<Step>? steps;
+
+  /// The locations of via waypoints along this leg.
+  /// contains info about points through which the route was laid
+  final ViaWaypoint? viaWaypoint;
 }
 
 /// Each element in the steps array defines a single step of the
@@ -1388,6 +1396,32 @@ class Vehicle {
   /// Contains the URL for the icon associated with this
   /// vehicle type, based on the local transport signage.
   final String? localIcon;
+}
+
+/// The locations of via waypoints along this leg.
+/// contains info about points through which the route was laid
+class ViaWaypoint {
+  const ViaWaypoint({
+    this.location,
+    this.stepIndex,
+    this.stepInterpolation,
+  });
+
+  factory ViaWaypoint.fromMap(Map<String, dynamic> map) => ViaWaypoint(
+        location: _getGeoCoordFromMap(map['location']),
+        stepIndex: map['step_index'] as int?,
+        stepInterpolation: map['step_interpolation'] as num?,
+      );
+
+  /// The location of the waypoint.
+  final GeoCoord? location;
+
+  /// The index of the step containing the waypoint.
+  final int? stepIndex;
+
+  /// The position of the waypoint along the step's polyline,
+  /// expressed as a ratio from 0 to 1.
+  final num? stepInterpolation;
 }
 
 /// The status field within the Directions response object contains
