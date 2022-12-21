@@ -1518,6 +1518,7 @@ class VehicleType {
     heavyRail,
     highSpeedTrain,
     intercityBus,
+    longDistanceTrain,
     metroRail,
     monorail,
     other,
