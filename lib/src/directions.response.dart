@@ -1367,7 +1367,7 @@ class Vehicle {
         name: map['name'] as String?,
         type: map['type'] != null ? VehicleType(map['type']) : null,
         icon: map['icon'] as String?,
-        localIcon: map['localIcon'] as String?,
+        localIcon: map['local_icon'] as String?,
       );
 
   /// Contains the name of the vehicle on this line. eg. "Subway."
