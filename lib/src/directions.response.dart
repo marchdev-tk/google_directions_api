@@ -1242,7 +1242,9 @@ class Time {
   factory Time.fromMap(Map<String, dynamic> map) => Time(
         text: map['text'] as String?,
         timeZone: map['time_zone'] as String?,
-        value: DateTime.tryParse(map['value'] as String),
+        value: map['value'] != null
+            ? DateTime.fromMillisecondsSinceEpoch(map['value'] * 1000)
+            : null,
       );
 
   /// The time specified as a [String]. The time is displayed in the time
