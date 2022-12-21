@@ -791,6 +791,7 @@ class Step {
     this.transit,
     this.travelMode,
     this.polyline,
+    this.maneuver,
   });
 
   factory Step.fromMap(Map<String, dynamic> map) => Step(
@@ -812,6 +813,7 @@ class Step {
         polyline: map['polyline'] != null
             ? OverviewPolyline.fromMap(map['polyline'])
             : null,
+        maneuver: map['maneuver'] as String?,
       );
 
   /// Contains the distance covered by this step until the next
@@ -857,6 +859,10 @@ class Step {
 
   /// Contains a points describing the course of this step.
   final OverviewPolyline? polyline;
+
+  /// Contains the action to take for the current step (turn left, merge,
+  /// straight, etc.).
+  final String? maneuver;
 }
 
 /// Transit directions return additional information that is not
