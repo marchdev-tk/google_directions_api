@@ -1523,7 +1523,7 @@ class VehicleType {
   static const intercityBus = VehicleType('INTERCITY_BUS');
 
   /// Long distance train.
-  static const intercityBus = VehicleType('LONG_DISTANCE_TRAIN');
+  static const longDistanceTrain = VehicleType('LONG_DISTANCE_TRAIN');
 
   /// Light rail.
   static const metroRail = VehicleType('METRO_RAIL');
