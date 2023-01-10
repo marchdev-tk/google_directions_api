@@ -429,9 +429,9 @@ class TransitOptions {
 
   @override
   String toString() =>
-      '${_addIfNotNull('arrival_time', arrivalTime!.millisecondsSinceEpoch)}'
-      '${_addIfNotNull('departure_time', departureTime!.millisecondsSinceEpoch)}'
-      '${_addIfNotNull('transit_mode', modes!.map((_) => _.toString()).join('|'))}'
+      '${_addIfNotNull('arrival_time', arrivalTime?.millisecondsSinceEpoch)}'
+      '${_addIfNotNull('departure_time', departureTime?.millisecondsSinceEpoch)}'
+      '${_addIfNotNull('transit_mode', modes?.map((_) => _.toString()).join('|'))}'
       '${_addIfNotNull('transit_routing_preference', routingPreference)}';
 }
 
@@ -556,7 +556,7 @@ class DrivingOptions {
 
   @override
   String toString() =>
-      '${_addIfNotNull('departure_time', departureTime!.millisecondsSinceEpoch)}'
+      '${_addIfNotNull('departure_time', departureTime?.millisecondsSinceEpoch)}'
       '${_addIfNotNull('traffic_model', trafficModel)}';
 }
 
