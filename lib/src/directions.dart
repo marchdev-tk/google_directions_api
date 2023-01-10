@@ -161,16 +161,16 @@ class TravelMode {
   static final values = <TravelMode>[bicycling, driving, transit, walking];
 
   /// Specifies a bicycling directions request.
-  static const bicycling = TravelMode('bicycling');
+  static const bicycling = TravelMode('BICYCLING');
 
   /// Specifies a driving directions request.
-  static const driving = TravelMode('driving');
+  static const driving = TravelMode('DRIVING');
 
   /// Specifies a transit directions request.
-  static const transit = TravelMode('transit');
+  static const transit = TravelMode('TRANSIT');
 
   /// Specifies a walking directions request.
-  static const walking = TravelMode('walking');
+  static const walking = TravelMode('WALKING');
 
   @override
   int get hashCode => _name.hashCode;

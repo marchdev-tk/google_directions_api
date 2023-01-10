@@ -221,7 +221,7 @@ class DirectionsRequest {
   @override
   String toString() => '?origin=${_convertLocation(origin)}&'
       'destination=${_convertLocation(destination)}'
-      '${_addIfNotNull('mode', travelMode)}'
+      '${_addIfNotNull('mode', travelMode?.toString().toLowerCase())}'
       '${_addIfNotNull('waypoints', _convertWaypoints())}'
       '${_addIfNotNull('alternatives', alternatives)}'
       '${_addIfNotNull('avoid', _convertAvoids())}'
@@ -628,23 +628,23 @@ class TransitMode {
 
   /// Indicates that the calculated route should prefer travel
   /// by bus.
-  static const bus = TransitMode('BUS');
+  static const bus = TransitMode('bus');
 
   /// Indicates that the calculated route should prefer travel
   /// by bus.
-  static const subway = TransitMode('SUBWAY');
+  static const subway = TransitMode('subway');
 
   /// Indicates that the calculated route should prefer travel
   /// by bus.
-  static const train = TransitMode('TRAIN');
+  static const train = TransitMode('train');
 
   /// Indicates that the calculated route should prefer travel
   /// by bus.
-  static const tram = TransitMode('TRAM');
+  static const tram = TransitMode('tram');
 
   /// Indicates that the calculated route should prefer travel
   /// by bus.
-  static const rail = TransitMode('RAIL');
+  static const rail = TransitMode('rail');
 
   @override
   String toString() => _name;
