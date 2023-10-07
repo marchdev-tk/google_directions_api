@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.9.2
+* update http: 1.0.0
+
 ## 0.9.1
 
 * Fixed misnaming of `duration_in_trafic`
