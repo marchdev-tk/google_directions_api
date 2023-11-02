@@ -1,4 +1,6 @@
 # Changelog
+## 0.9.3
+* update http: 1.1.0
 
 ## 0.9.2
 * update http: 1.0.0
