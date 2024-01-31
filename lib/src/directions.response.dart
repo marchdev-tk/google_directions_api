@@ -602,6 +602,7 @@ class Leg {
     this.startAddress,
     this.startLocation,
     this.steps,
+    this.viaWaypoint,
   });
 
   factory Leg.fromMap(Map<String, dynamic> map) => Leg(
@@ -624,6 +625,8 @@ class Leg {
         startAddress: map['start_address'] as String?,
         startLocation: _getGeoCoordFromMap(map['start_location']),
         steps: (map['steps'] as List?)?.mapList((_) => Step.fromMap(_)),
+        viaWaypoint: (map['via_waypoint'] as List?)
+            ?.mapList((_) => ViaWaypoint.fromMap(_)),
       );
 
   /// Contains the estimated time of arrival for this leg. This property
@@ -715,6 +718,10 @@ class Leg {
   /// contains an array of steps denoting information about each
   /// separate step of the leg of the journey.
   final List<Step>? steps;
+
+  /// The locations of via waypoints along this leg.
+  /// contains info about points through which the route was laid
+  final List<ViaWaypoint>? viaWaypoint;
 }
 
 /// Each element in the steps array defines a single step of the
@@ -791,6 +798,7 @@ class Step {
     this.transit,
     this.travelMode,
     this.polyline,
+    this.maneuver,
   });
 
   factory Step.fromMap(Map<String, dynamic> map) => Step(
@@ -804,14 +812,15 @@ class Step {
         instructions: map['html_instructions'] as String?,
         path: (map['path'] as List?)?.mapList((_) => _getGeoCoordFromMap(_)),
         steps: (map['steps'] as List?)?.mapList((_) => Step.fromMap(_)),
-        transit: map['transit'] != null
-            ? TransitDetails.fromMap(map['transit'])
+        transit: map['transit_details'] != null
+            ? TransitDetails.fromMap(map['transit_details'])
             : null,
         travelMode:
             map['travel_mode'] != null ? TravelMode(map['travel_mode']) : null,
         polyline: map['polyline'] != null
             ? OverviewPolyline.fromMap(map['polyline'])
             : null,
+        maneuver: map['maneuver'] as String?,
       );
 
   /// Contains the distance covered by this step until the next
@@ -857,6 +866,10 @@ class Step {
 
   /// Contains a points describing the course of this step.
   final OverviewPolyline? polyline;
+
+  /// Contains the action to take for the current step (turn left, merge,
+  /// straight, etc.).
+  final String? maneuver;
 }
 
 /// Transit directions return additional information that is not
@@ -1242,7 +1255,9 @@ class Time {
   factory Time.fromMap(Map<String, dynamic> map) => Time(
         text: map['text'] as String?,
         timeZone: map['time_zone'] as String?,
-        value: DateTime.tryParse(map['value'] as String),
+        value: map['value'] != null
+            ? DateTime.fromMillisecondsSinceEpoch(map['value'] * 1000)
+            : null,
       );
 
   /// The time specified as a [String]. The time is displayed in the time
@@ -1365,7 +1380,7 @@ class Vehicle {
         name: map['name'] as String?,
         type: map['type'] != null ? VehicleType(map['type']) : null,
         icon: map['icon'] as String?,
-        localIcon: map['localIcon'] as String?,
+        localIcon: map['local_icon'] as String?,
       );
 
   /// Contains the name of the vehicle on this line. eg. "Subway."
@@ -1380,6 +1395,32 @@ class Vehicle {
   /// Contains the URL for the icon associated with this
   /// vehicle type, based on the local transport signage.
   final String? localIcon;
+}
+
+/// The locations of via waypoints along this leg.
+/// contains info about points through which the route was laid
+class ViaWaypoint {
+  const ViaWaypoint({
+    this.location,
+    this.stepIndex,
+    this.stepInterpolation,
+  });
+
+  factory ViaWaypoint.fromMap(Map<String, dynamic> map) => ViaWaypoint(
+        location: _getGeoCoordFromMap(map['location']),
+        stepIndex: map['step_index'] as int?,
+        stepInterpolation: map['step_interpolation'] as num?,
+      );
+
+  /// The location of the waypoint.
+  final GeoCoord? location;
+
+  /// The index of the step containing the waypoint.
+  final int? stepIndex;
+
+  /// The position of the waypoint along the step's polyline,
+  /// expressed as a ratio from 0 to 1.
+  final num? stepInterpolation;
 }
 
 /// The status field within the Directions response object contains
@@ -1476,6 +1517,7 @@ class VehicleType {
     heavyRail,
     highSpeedTrain,
     intercityBus,
+    longDistanceTrain,
     metroRail,
     monorail,
     other,
@@ -1513,6 +1555,9 @@ class VehicleType {
 
   /// Intercity bus.
   static const intercityBus = VehicleType('INTERCITY_BUS');
+
+  /// Long distance train.
+  static const longDistanceTrain = VehicleType('LONG_DISTANCE_TRAIN');
 
   /// Light rail.
   static const metroRail = VehicleType('METRO_RAIL');
