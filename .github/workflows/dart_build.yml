@@ -2,40 +2,29 @@ name: build
 
 on:
   push:
-    branches: 
-      - master
-      - develop
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
-  build:
-
+  publish:
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+    
     runs-on: ubuntu-latest
 
-    container:
-      image:  google/dart:latest
-
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: pub get
+    - name: 'Setup Dart'
+      uses: dart-lang/setup-dart@v1
 
-#     - name: Run tests
-#       run: pub run test
+    - name: 'Get Packages'
+      run: dart pub get
 
-#     - name: Activate coverage package
-#       run: pub global activate coverage
+    - name: 'Dry Run Publishing'
+      run: dart pub publish --dry-run
 
-#     - name: Collect coverage in json
-#       run: dart --disable-service-auth-codes --enable-vm-service=8111 --pause-isolates-on-exit test/google_polyline_algorithm_test.dart & nohup pub global run coverage:collect_coverage --port=8111 --out=coverage.json --wait-paused --resume-isolates
-
-#     - name: Convert coverage to lcov
-#       run: pub global run coverage:format_coverage --lcov --in=coverage.json --out=lcov.info --packages=.packages --report-on=lib
-
-#     - name: Upload coverage to Codecov
-#       uses: codecov/codecov-action@v1.0.5
-#       with:
-#         token: ${{ secrets.CODECOV_TOKEN }}
-#         flags: unittests
-#         file: ./lcov.info
-#         name: codecov-google_polyline_algorithm
+    - name: 'Publish Artifact'
+      run: dart pub publish --force
