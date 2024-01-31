@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.10.0
+
+* Updated dependencies (thanks to [@svoza10](https://github.com/svoza10))
+* Fixed [issue #9](https://github.com/marchdev-tk/google_directions_api/issues/9) (thanks to [@SamadiPour](https://github.com/SamadiPour))
+* Fixed [issue #12](https://github.com/marchdev-tk/google_directions_api/issues/12) (thanks to [@SamadiPour](https://github.com/SamadiPour))
+* Fixed [issue #16](https://github.com/marchdev-tk/google_directions_api/issues/16) (thanks to [@SamadiPour](https://github.com/SamadiPour))
+
 ## 0.9.1
 
 * Fixed misnaming of `duration_in_trafic`
